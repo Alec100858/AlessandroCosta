@@ -29,14 +29,12 @@ iframe.active{display:block}
 </style>
 </head>
 <body>
-
 <div class="hdr">
   <div class="hdr-logo"><span>W/</span>WISER LOG</div>
   <span class="hdr-sep">|</span>
   <span class="hdr-mod" id="hdr-mod">Gerenciador de Devolução</span>
   <div class="hdr-right"><div class="hdr-av">AS</div><span>Nespresso – Alessandro Silveira</span></div>
 </div>
-
 <div class="body">
   <div class="sb">
     <button class="sb-btn active" id="sb-ger" onclick="go('ger')" title="Gerenciador de Devolução"><span class="sb-icon">⊞</span><span class="sb-lbl">Gerenc.</span></button>
@@ -51,7 +49,6 @@ iframe.active{display:block}
     <iframe id="fr-caixas"></iframe>
   </div>
 </div>
-
 <template id="tpl-ger">
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2370,8 +2367,6 @@ function abrirNF(id){
   if(nfEmTriagem&&nfEmTriagem!==id){var em=nrs.find(function(x){return x.id===nfEmTriagem;});showAlerta('Finalize a triagem da NF '+(em?em.nf:'em andamento')+' antes de iniciar outra.');return;}
   if(d.status==='em-triagem'&&nfEmTriagem!==id){showAlerta('Esta NF já está em triagem por outro operador.');return;}
   d.status='em-triagem';nfEmTriagem=id;nfAtual=d;
-  var itPend=d.itens.filter(function(it){return it.status==='pend';});
-  if(itPend.length===1&&d.itens.every(function(it){return it.status!=='triando';})){abrirItem(id,itPend[0].id);return;}
   abrirItens(id);
 }
 
@@ -3100,12 +3095,10 @@ function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textConte
 
 </template>
 
-
 <script>
 var labels={'ger':'Gerenciador de Devolução','rem':'Remanejamento Devolução','tri':'Triagem de Devolução','caixas':'Gestão de Caixas'};
 var cur='ger';
 var loaded={};
-
 function go(k){
   if(k===cur)return; cur=k;
   document.querySelectorAll('.sb-btn').forEach(function(e){e.classList.remove('active');});
@@ -3115,16 +3108,13 @@ function go(k){
   document.getElementById('hdr-mod').textContent=labels[k];
   loadFrame(k);
 }
-
 function loadFrame(k){
-  if(loaded[k])return;
-  loaded[k]=true;
+  if(loaded[k])return; loaded[k]=true;
   var tpl=document.getElementById('tpl-'+k);
   if(!tpl)return;
   var blob=new Blob([tpl.innerHTML],{type:'text/html'});
   document.getElementById('fr-'+k).src=URL.createObjectURL(blob);
 }
-
 loadFrame('ger');
 </script>
 </body>
