@@ -62,19 +62,19 @@ iframe.active{display:block}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5;overflow-x:hidden}
 
-.hdr{position:fixed;top:0;left:0;right:0;height:46px;background:linear-gradient(90deg,#0057b8 60%,#1a9fd4);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.hdr-logo{color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+
+
 .hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
-.hdr-sep{color:rgba(255,255,255,.25);margin:0 6px}
-.hdr-module{color:rgba(255,255,255,.88);font-size:11px}
-.hdr-right{margin-left:auto;color:#fff;font-size:10px;display:flex;align-items:center;gap:8px}
-.hdr-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#26c281);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
 
-.sidebar{position:fixed;top:46px;left:0;bottom:0;width:44px;background:#fff;border-right:1px solid #e4e6ea;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:5px;z-index:99;overflow:hidden}
-.sb-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#26c281;font-size:13px;cursor:pointer;border:none;background:none;transition:background .15s}
-.sb-btn:hover,.sb-btn.active{background:#e8f5ee}
 
-.main{margin-left:44px;margin-top:46px;padding:18px;background:#f0f2f5;min-height:calc(100vh - 46px);}
+
+
+
+
+
+.sb-btn:hover,
+
+.main{padding:18px;background:#f0f2f5;min-height:calc(100vh - 46px);}
 .page{display:none}.page.active{display:block}
 .bread{font-size:10px;color:#aaa;margin-bottom:6px}
 .bread a{color:#0057b8;cursor:pointer;text-decoration:none}
@@ -206,19 +206,9 @@ tr.div-row:hover td{background:#fff0f0;}
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-logo"><span>W/</span>WISER LOG</div>
-  <span class="hdr-sep">|</span>
-  <span class="hdr-module">Gerenciador de Devolução</span>
-  <div class="hdr-right">
-    <div class="hdr-av">AS</div>
-    <span>Nespresso – Alessandro Silveira ▾</span>
-  </div>
-</div>
 
-<div class="sidebar">
-  <button class="sb-btn active" id="sb-ger" onclick="nav('ger')" title="Gerenciador de Devolução">⊞</button>
-</div>
+
+
 
 <div class="main">
 
@@ -281,7 +271,7 @@ tr.div-row:hover td{background:#fff0f0;}
 
   <!-- CRIAR NR -->
   <div class="page" id="page-nr">
-    <div class="bread">Home / <a onclick="nav('ger')">Gerenciador de Devolução</a> / Criar NR</div>
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn" onclick="_goBack()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('ger')">Gerenciador de Devolução</a> / Criar NR</span></div>
     <div class="page-title">CRIAR NR — RECEBIMENTO DE DEVOLUÇÃO</div>
 
     <div class="form-wrap">
@@ -572,10 +562,10 @@ var tiposRecebimento=[
 
 var nrs=[
   {id:1,data:'28/05/2026',nr:'NR-00412',nf:'98231/1',cliente:'João Silva',cnpj:'123.456.789-00',nn:'NN-001',pedido:'PED-001',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:2,insucesso:true,etqHist:[]},
-  {id:2,data:'27/05/2026',nr:'NR-00411',nf:'97115/1',cliente:'Maria Santos',cnpj:'987.654.321-00',nn:'',pedido:'PED-002',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,vol:1,insucesso:true,etqHist:[]},
+  {id:2,data:'27/05/2026',nr:'NR-00411',nf:'97115/1',cliente:'Maria Santos',cnpj:'987.654.321-00',nn:'',pedido:'PED-002',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,divObs:'Quantidade recebida divergente da nota fiscal.',vol:1,insucesso:true,etqHist:[]},
   {id:3,data:'26/05/2026',nr:'NR-00410',nf:'45680/1',cliente:'Empresa ABC Ltda',cnpj:'12.345.678/0001-99',nn:'NN-003',pedido:'',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:3,insucesso:false,etqHist:[]},
   {id:4,data:'25/05/2026',nr:'NR-00409',nf:'45679/2',cliente:'Carlos Oliveira',cnpj:'111.222.333-44',nn:'',pedido:'PED-004',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:1,insucesso:true,etqHist:[]},
-  {id:5,data:'24/05/2026',nr:'NR-00408',nf:'45678/1',cliente:'Empresa XYZ SA',cnpj:'98.765.432/0001-10',nn:'NN-005',pedido:'',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,vol:2,insucesso:false,etqHist:[]},
+  {id:5,data:'24/05/2026',nr:'NR-00408',nf:'45678/1',cliente:'Empresa XYZ SA',cnpj:'98.765.432/0001-10',nn:'NN-005',pedido:'',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,divObs:'Quantidade recebida divergente da nota fiscal.',vol:2,insucesso:false,etqHist:[]},
   {id:6,data:'23/05/2026',nr:'NR-00407',nf:'45677/1',cliente:'Ana Costa',cnpj:'555.666.777-88',nn:'',pedido:'PED-006',status:'lib',csv:true,csvInfo:'23/05 09:14 – Alessandro',libInfo:'',div:false,vol:1,insucesso:true,etqHist:[]},
   {id:7,data:'22/05/2026',nr:'NR-00406',nf:'45676/1',cliente:'Pedro Lima',cnpj:'444.555.666-77',nn:'NN-007',pedido:'PED-007',status:'lib',csv:true,csvInfo:'22/05 10:22 – Alessandro',libInfo:'',div:false,vol:2,insucesso:true,etqHist:[]},
   {id:8,data:'21/05/2026',nr:'NR-00405',nf:'45675/2',cliente:'Empresa MNO',cnpj:'11.222.333/0001-44',nn:'',pedido:'',status:'lib',csv:true,csvInfo:'21/05 14:00 – Alessandro',libInfo:'',div:false,vol:4,insucesso:false,etqHist:[]},
@@ -597,13 +587,30 @@ function today(){return new Date().toLocaleDateString('pt-BR');}
 function todayISO(){var d=new Date();return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))+'-'+String(d.getDate()).padStart(2,'0');}
 
 // NAVEGAÇÃO
+var _navHist=[];
 function nav(p){
+  var cur=document.querySelector('.page.active');
+  if(cur&&cur.id!=='page-'+p)_navHist.push(cur.id.replace('page-',''));
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
   document.querySelectorAll('.sb-btn[id^="sb-"]').forEach(function(x){x.classList.remove('active')});
   document.getElementById('page-'+p).classList.add('active');
   var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
   if(p==='ger'){renderTable();updateCounters();}
   if(p==='nr')resetNR();
+  _updateBackBtn();
+}
+function _goBack(){
+  if(_navHist.length===0)return;
+  var prev=_navHist.pop();
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('page-'+prev).classList.add('active');
+  if(prev==='ger'){renderTable();updateCounters();}
+  _updateBackBtn();
+}
+function _updateBackBtn(){
+  document.querySelectorAll('.back-btn').forEach(function(b){
+    b.style.display=_navHist.length>0?'inline-flex':'none';
+  });
 }
 
 // GERENCIADOR
@@ -647,7 +654,8 @@ function renderTable(){
 
   tbody.innerHTML=filtered.map(function(d){
     var chk='<input type="checkbox" onchange="toggleSel('+d.id+',this.checked)" '+(selected.includes(d.id)?'checked':'')+'/>';
-    var nfCell=(d.div?'<span style="color:#c62828;font-size:14px;font-weight:700;margin-right:4px;vertical-align:middle" title="NF com itens divergentes">⚠</span>':'')+d.nf;
+    var divObs=d.divObs?d.divObs:'';
+  var nfCell=(d.div?'<span style="color:#c62828;font-size:14px;font-weight:700;margin-right:4px;vertical-align:middle" title="'+divObs+'">⚠</span>':'')+d.nf+(d.div&&divObs?'<div style="font-size:9px;color:#c62828;margin-top:2px">'+divObs+'</div>':'');
     var extra='';
     if(statusAtivo==='env'){
       var csvB=d.csv?'<span class="badge b-teal">✓ '+d.csvInfo+'</span>':'<span style="color:#aaa;font-size:9px">Não gerado</span>';
@@ -991,63 +999,6 @@ function confirmarImpressao(){
 var etqIdsParaImprimir=[];
 
 
-var libData=[
-  {id:1,data:'2026-05-20',nr:'NR-00123',nf:'NF-45678',status:'aguard-lib',csvGerado:false,csvInfo:'',libInfo:'',cnpj:'123.456.789-00',nn:'NN-001'},
-  {id:2,data:'2026-05-21',nr:'NR-00124',nf:'NF-45679',status:'aguard-lib',csvGerado:true,csvInfo:'26/05/2026 09:14 – Alessandro',libInfo:'',cnpj:'987.654.321-00',nn:''},
-  {id:3,data:'2026-05-22',nr:'NR-00125',nf:'NF-45680',status:'aguard-tri',csvGerado:true,csvInfo:'25/05/2026 14:22 – Alessandro',libInfo:'26/05/2026 10:00 – Alessandro',cnpj:'12.345.678/0001-99',nn:'NN-003'},
-  {id:4,data:'2026-05-23',nr:'NR-00126',nf:'NF-45681',status:'bancada',csvGerado:true,csvInfo:'24/05/2026 11:00 – Alessandro',libInfo:'25/05/2026 09:00 – Alessandro',bancadaInfo:'26/05/2026 08:30 – Operador01',cnpj:'11.222.333/0001-44',nn:''},
-  {id:5,data:'2026-05-24',nr:'NR-00127',nf:'NF-45682',status:'triagem',csvGerado:true,csvInfo:'23/05/2026 10:00 – Alessandro',libInfo:'24/05/2026 09:00 – Alessandro',bancadaInfo:'25/05/2026 07:00 – Operador01',triagemInfo:'26/05/2026 08:00 – Operador01'},
-];
-
-var execNFs=[
-  {id:1,nf:'NF-45681',serie:'1',qtd:3,emTriagem:false},
-  {id:2,nf:'NF-45682',serie:'1',qtd:1,emTriagem:false},
-  {id:3,nf:'NF-45683',serie:'2',qtd:5,emTriagem:true},
-];
-
-var execItens=[
-  {id:1,cod:'PROD-001',desc:'Café 250g Intenso',qtd:30},
-  {id:2,cod:'PROD-002',desc:'Máquina Inissia Branca',qtd:5},
-  {id:3,cod:'PROD-003',desc:'Sleeve Virtuo',qtd:12},
-];
-
-var libSelectedNRs=[];
-var libCancelNRId=null;
-
-function showOK(msg){document.getElementById('ok-msg').textContent=msg;document.getElementById('modal-ok').classList.add('show');}
-
-
-
-
-
-function filtrarStatus(s){
-  statusAtivo = s;
-  document.querySelectorAll('.panel-card').forEach(function(c){c.classList.remove('active')});
-  var mapping = {'aguard-lib':'pc-aguard-lib','aguard-tri':'pc-aguard-tri','bancada':'pc-bancada','triagem':'pc-triagem'};
-  document.getElementById(mapping[s]).classList.add('active');
-  libSelectedNRs = [];
-  renderLibTable();
-}
-
-function onStatusChange(){
-}
-
-function updateCounters(){
-  var map = {
-    'cnt-env': nrs.filter(function(d){return d.status==='env';}).length,
-    'cnt-lib': nrs.filter(function(d){return d.status==='lib';}).length,
-    'cnt-tri': nrs.filter(function(d){return d.status==='tri';}).length,
-    'cnt-div': nrs.filter(function(d){return d.div;}).length
-  };
-  Object.keys(map).forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.textContent=map[id];
-  });
-}
-
-updateCounters();
-renderTable();
-
 function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 function showAlerta(msg){var el=document.getElementById('alerta-msg-ger');if(el)el.textContent=msg;document.getElementById('modal-alerta-ger').classList.add('show');}
 </script>
@@ -1075,12 +1026,12 @@ function showAlerta(msg){var el=document.getElementById('alerta-msg-ger');if(el)
 body{font-family:Arial,sans-serif;font-size:13px;background:#f0f2f5;max-width:480px;margin:0 auto;min-height:100vh}
 
 /* HEADER */
-.hdr{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:12px 16px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.hdr-logo{color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px}
+
+
 .hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:2px 4px;border-radius:2px}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.hdr-user{color:rgba(255,255,255,.85);font-size:10px}
-.hdr-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#26c281);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.3)}
+
+
+
 
 /* STEP BAR */
 .stepbar{background:#fff;border-bottom:1px solid #e4e6ea;padding:10px 16px;display:flex;align-items:center;position:sticky;top:54px;z-index:99}
@@ -1206,13 +1157,7 @@ tr.done-row{background:#f1f8e9}
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-logo"><span>W/</span>WISER LOG</div>
-  <div class="hdr-right">
-    <span class="hdr-user">Alessandro Silveira</span>
-    <div class="hdr-av">AS</div>
-  </div>
-</div>
+
 
 <div class="stepbar">
   <div class="step active" id="step1"><div class="step-dot">1</div><div class="step-lbl">Tarefa</div></div>
@@ -1561,17 +1506,17 @@ function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textConte
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
-.hdr{position:fixed;top:0;left:0;right:0;height:46px;background:linear-gradient(90deg,#0057b8 60%,#1a9fd4);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.hdr-logo{color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+
+
 .hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
-.hdr-sep{color:rgba(255,255,255,.25);margin:0 4px}
-.hdr-mod{color:rgba(255,255,255,.85);font-size:11px}
-.hdr-right{margin-left:auto;color:#fff;font-size:10px;display:flex;align-items:center;gap:8px}
-.hdr-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#26c281);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
-.sidebar{position:fixed;top:46px;left:0;bottom:0;width:44px;background:#fff;border-right:1px solid #e4e6ea;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:5px;z-index:99}
-.sb-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#26c281;font-size:13px;cursor:pointer;border:none;background:none}
-.sb-btn:hover,.sb-btn.active{background:#e8f5ee}
-.main{margin-left:44px;margin-top:46px;padding:18px;min-height:calc(100vh-46px)}
+
+
+
+
+
+
+.sb-btn:hover,
+.main{padding:18px;min-height:calc(100vh-46px)}
 .page{display:none}.page.active{display:block}
 .bread{font-size:10px;color:#aaa;margin-bottom:6px}
 .bread a{color:#0057b8;cursor:pointer;text-decoration:none}
@@ -1685,16 +1630,8 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-logo"><span>W/</span>WISER LOG</div>
-  <span class="hdr-sep">|</span>
-  <span class="hdr-mod">Triagem de Devolução</span>
-  <div class="hdr-right"><div class="hdr-av">AS</div><span>Nespresso – Alessandro Silveira ▾</span></div>
-</div>
-<div class="sidebar">
-  <button class="sb-btn active" id="sb-gestao" onclick="nav('gestao')" title="Gestão de Triagem">☰</button>
-  <button class="sb-btn" id="sb-exec" onclick="nav('exec')" title="Executar Triagem">▶</button>
-</div>
+
+
 
 <div class="main">
 
@@ -1773,7 +1710,7 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
   <!-- ══ EXECUTAR TRIAGEM ══ -->
   <div class="page" id="page-exec">
-    <div class="bread">Home / Triagem de Devolução / Executar Triagem</div>
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / Triagem de Devolução / Executar Triagem</span></div>
     <div class="page-title">EXECUTAR TRIAGEM</div>
     <div class="search-box">
       <input type="text" id="exec-pesq" placeholder="Pesquisar por NF, NR ou Nº Pedido" style="height:28px;font-size:11px"/>
@@ -1786,7 +1723,7 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
   <!-- ══ ITENS DA NF ══ -->
   <div class="page" id="page-itens">
-    <div class="bread">Home / <a onclick="nav('exec')">Executar Triagem</a> / Itens da NF</div>
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('exec')">Executar Triagem</a> / Itens da NF</span></div>
     <div class="page-title" id="itens-titulo">Itens da NF</div>
     <div id="itens-obs-div" style="display:none"></div>
     <div class="card">
@@ -1799,7 +1736,7 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
   <!-- ══ TRIAGEM DO ITEM ══ -->
   <div class="page" id="page-triagem-item">
-    <div class="bread">Home / <a onclick="nav('exec')">Executar Triagem</a> / <a onclick="voltarItens()">Itens da NF</a> / Triar Produto</div>
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('exec')">Executar Triagem</a> / <a onclick="voltarItens()">Itens da NF</a> / Triar Produto</span></div>
     <div class="page-title" id="ti-titulo">Triagem do Produto</div>
     <div class="card" style="background:#f0f7ff;border:1px solid #b8d0f0;padding:12px 16px;margin-bottom:12px">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:10px">
@@ -2065,13 +2002,31 @@ function today(){return new Date().toLocaleDateString('pt-BR');}
 function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
 /* ══ NAVEGAÇÃO ══ */
+var _navHistTri=[];
 function nav(p){
+  var cur=document.querySelector('.page.active');
+  if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.sb-btn').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
   var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
   if(p==='gestao'){initGestao();}
   if(p==='exec'){renderExec();}
+  _updateBackBtnTri();
+}
+function _goBackTri(){
+  if(_navHistTri.length===0)return;
+  var prev=_navHistTri.pop();
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+prev).classList.add('active');
+  if(prev==='gestao')initGestao();
+  if(prev==='exec')renderExec();
+  _updateBackBtnTri();
+}
+function _updateBackBtnTri(){
+  document.querySelectorAll('.back-btn-tri').forEach(function(b){
+    b.style.display=_navHistTri.length>0?'inline-flex':'none';
+  });
 }
 function voltarItens(){if(nfAtual)abrirItens(nfAtual.id);else nav('exec');}
 
@@ -2149,7 +2104,7 @@ function renderCaixas(){
     return;
   }
   // Verificar se há NFs pendentes (para cor dos cards)
-  var temPendente=nrs.some(function(d){return(d.status==='liberada'||d.status==='em-triagem')&&d.bancada===bancadaAtual.cod;});
+  var temPendente=nrs.some(function(d){return d.status==='em-triagem'&&d.bancada===bancadaAtual.cod;});
   var colorMap={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
   var grid=document.createElement('div');
   grid.className='caixas-grid';
@@ -2159,7 +2114,7 @@ function renderCaixas(){
     if(temPendente)cardClass+=' pendente';
     card.className=cardClass;
     var canClose=!temPendente;
-    var closeBtnTitle=canClose?'Fechar caixa':'Existem NFs pendentes. Conclua todas as triagens para fechar.';
+    var closeBtnTitle=canClose?'Fechar caixa':'Existe triagem em andamento. Conclua a triagem ativa para fechar.';
     card.innerHTML='<div class="caixa-top">'+
       '<span class="caixa-cod">'+cx.end+'</span>'+
       '<span class="badge b-green">Aberta</span>'+
@@ -2549,17 +2504,17 @@ initGestao();
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
-.hdr{position:fixed;top:0;left:0;right:0;height:46px;background:linear-gradient(90deg,#0057b8 60%,#1a9fd4);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.hdr-logo{color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+
+
 .hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
-.hdr-sep{color:rgba(255,255,255,.25);margin:0 4px}
-.hdr-mod{color:rgba(255,255,255,.85);font-size:11px}
-.hdr-right{margin-left:auto;color:#fff;font-size:10px;display:flex;align-items:center;gap:8px}
-.hdr-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#26c281);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
-.sidebar{position:fixed;top:46px;left:0;bottom:0;width:44px;background:#fff;border-right:1px solid #e4e6ea;display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:5px;z-index:99}
-.sb-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#26c281;font-size:13px;cursor:pointer;border:none;background:none}
-.sb-btn:hover,.sb-btn.active{background:#e8f5ee}
-.main{margin-left:44px;margin-top:46px;padding:18px}
+
+
+
+
+
+
+.sb-btn:hover,
+.main{padding:18px}
 .page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:4px}
 .page-sub{font-size:10px;color:#888;margin-bottom:18px}
 /* CARDS RESUMO */
@@ -2663,16 +2618,9 @@ tr.div-row td:first-child{border-left:3px solid #c62828}
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-logo"><span>W/</span>WISER LOG</div>
-  <span class="hdr-sep">|</span>
-  <span class="hdr-mod">Gestão de Caixas — Triagem</span>
-  <div class="hdr-right"><div class="hdr-av">AS</div><span>Nespresso – Alessandro Silveira ▾</span></div>
-</div>
 
-<div class="sidebar">
-  <button class="sb-btn active" title="Gestão de Caixas">📦</button>
-</div>
+
+
 
 <div class="main">
   <div class="page-title">GESTÃO DE CAIXAS — TRIAGEM</div>
