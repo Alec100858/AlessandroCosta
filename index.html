@@ -1632,6 +1632,11 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
 <div class="main">
 
+<div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e4e6ea">
+  <button id="tab-gestao" onclick="nav('gestao')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#0057b8;cursor:pointer;border-bottom:2px solid #0057b8;margin-bottom:-2px">☰ Gestão</button>
+  <button id="tab-exec" onclick="nav('exec')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px">▶ Executar Triagem</button>
+</div>
+
   <!-- ══ GESTÃO ══ -->
   <div class="page active" id="page-gestao">
     <div class="bread">Home / Triagem de Devolução</div>
@@ -1969,14 +1974,14 @@ var caixas=[
 
 var nrs=[
   {id:1,data:'26/05/2026',nr:'NR-00406',nf:'45676/1',serie:'1',cliente:'João Silva',nn:'NN-001',
-   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-001',
+   status:'liberada',bancada:'BANC-01',vols:2,pedido:'PED-001',
    recebidoEm:'26/05/2026 09:00',recebidoPor:'Operador01',liberadoEm:'',div:false,divObs:'',
    itens:[
      {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
      {id:2,pn:'PROD-002',desc:'Cápsula Vanille 10un',qtd:5,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
    ]},
   {id:2,data:'26/05/2026',nr:'NR-00407',nf:'45677/1',serie:'1',cliente:'Maria Santos',nn:'',
-   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-002',
+   status:'liberada',bancada:'BANC-01',vols:2,pedido:'PED-002',
    recebidoEm:'26/05/2026 09:10',recebidoPor:'Operador01',liberadoEm:'',div:true,divObs:'Embalagem danificada.',
    itens:[
      {id:1,pn:'PROD-003',desc:'Sleeve Virtuo',qtd:8,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false},
@@ -2004,12 +2009,15 @@ function nav(p){
   var cur=document.querySelector('.page.active');
   if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
-  document.querySelectorAll('.sb-btn').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
-  var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
   if(p==='gestao'){initGestao();}
   if(p==='exec'){renderExec();}
   _updateBackBtnTri();
+  // Atualizar tabs
+  var tG=document.getElementById('tab-gestao');
+  var tE=document.getElementById('tab-exec');
+  if(tG){tG.style.color=p==='gestao'?'#0057b8':'#aaa';tG.style.borderBottomColor=p==='gestao'?'#0057b8':'transparent';}
+  if(tE){tE.style.color=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'#aaa';tE.style.borderBottomColor=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'transparent';}
 }
 function _goBackTri(){
   if(_navHistTri.length===0)return;
@@ -2367,6 +2375,8 @@ function abrirNF(id){
   if(nfEmTriagem&&nfEmTriagem!==id){var em=nrs.find(function(x){return x.id===nfEmTriagem;});showAlerta('Finalize a triagem da NF '+(em?em.nf:'em andamento')+' antes de iniciar outra.');return;}
   if(d.status==='em-triagem'&&nfEmTriagem!==id){showAlerta('Esta NF já está em triagem por outro operador.');return;}
   d.status='em-triagem';nfEmTriagem=id;nfAtual=d;
+  var itPend=d.itens.filter(function(it){return it.status==='pend';});
+  if(itPend.length===1&&d.itens.every(function(it){return it.status!=='triando';})){abrirItem(id,itPend[0].id);return;}
   abrirItens(id);
 }
 
