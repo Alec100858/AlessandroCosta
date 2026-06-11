@@ -39,14 +39,12 @@ iframe.active{display:block}
   <div class="sb">
     <button class="sb-btn active" id="sb-ger" onclick="go('ger')" title="Gerenciador de Devolução"><span class="sb-icon">⊞</span><span class="sb-lbl">Gerenc.</span></button>
     <button class="sb-btn" id="sb-rem" onclick="go('rem')" title="Remanejamento Devolução"><span class="sb-icon">⇄</span><span class="sb-lbl">Remanej.</span></button>
-    <button class="sb-btn" id="sb-tri" onclick="go('tri')" title="Triagem de Devolução"><span class="sb-icon">⚙</span><span class="sb-lbl">Triagem</span></button>
-    <button class="sb-btn" id="sb-caixas" onclick="go('caixas')" title="Gestão de Caixas"><span class="sb-icon">📦</span><span class="sb-lbl">Caixas</span></button>
+    <button class="sb-btn" id="sb-tri" onclick="go('tri')" title="Triagem e Gestão de Caixas"><span class="sb-icon">⚙</span><span class="sb-lbl">Triagem</span></button>
   </div>
   <div class="frames">
     <iframe id="fr-ger" class="active"></iframe>
     <iframe id="fr-rem"></iframe>
     <iframe id="fr-tri"></iframe>
-    <iframe id="fr-caixas"></iframe>
   </div>
 </div>
 <template id="tpl-ger">
@@ -1496,8 +1494,15 @@ function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textConte
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wiser Log — Triagem de Devolução</title>
+<title>Wiser Log — Triagem e Gestão de Caixas</title>
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.top-tabs{display:flex;border-bottom:2px solid #e4e6ea;flex-shrink:0;background:#fff;padding:0 18px}
+.top-tab{padding:10px 20px;border:none;background:none;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
+.top-tab.active{color:#0057b8;border-bottom-color:#0057b8}
+.mod-main{display:none;flex:1;overflow-y:auto}
+.mod-main.active{display:block}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
 
@@ -1620,13 +1625,128 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 .ok-icon{width:50px;height:50px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:8px auto 12px;color:#1b5e20;font-size:22px;font-weight:700}
 .f-hint{font-size:9px;color:#888;margin-top:3px;font-style:italic}
 .footer{text-align:center;font-size:10px;color:#bbb;padding:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
+
+
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+
+
+
+
+
+
+.sb-btn:hover,
+.main{padding:18px}
+.page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:4px}
+.page-sub{font-size:10px;color:#888;margin-bottom:18px}
+/* CARDS RESUMO */
+.resumo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.resumo-card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:14px;text-align:center;border-top:3px solid transparent}
+.resumo-card.rc-blue{border-color:#0057b8}
+.resumo-card.rc-green{border-color:#1b5e20}
+.resumo-card.rc-orange{border-color:#e65100}
+.resumo-card.rc-red{border-color:#c62828}
+.resumo-card .rc-n{font-size:26px;font-weight:700;margin-bottom:4px}
+.resumo-card.rc-blue .rc-n{color:#0057b8}
+.resumo-card.rc-green .rc-n{color:#1b5e20}
+.resumo-card.rc-orange .rc-n{color:#e65100}
+.resumo-card.rc-red .rc-n{color:#c62828}
+.resumo-card .rc-l{font-size:9px;color:#777;line-height:1.4}
+.resumo-card{transition:box-shadow .15s,transform .1s}
+.resumo-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12);transform:translateY(-1px)}
+.resumo-card.rc-active{box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-1px);outline:2px solid currentColor}
+.resumo-card.rc-blue.rc-active{outline-color:#0057b8}
+.resumo-card.rc-green.rc-active{outline-color:#1b5e20}
+.resumo-card.rc-orange.rc-active{outline-color:#e65100}
+.resumo-card.rc-red.rc-active{outline-color:#c62828}
+/* FILTROS */
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:18px;margin-bottom:12px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
+select,input[type=text],input[type=date]{font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;background:#fff;color:#333;height:28px;font-family:Arial}
+.btn{border:none;border-radius:4px;padding:4px 14px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:28px;font-family:Arial}
+.bb{background:#0057b8;color:#fff}.bb:hover{background:#004494}
+.bg{background:#757575;color:#fff}
+.bo{background:#fff;color:#0057b8;border:1px solid #0057b8}
+.btn-sm{height:22px;padding:0 8px;font-size:9px}
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.toggle{width:32px;height:18px;background:#d0d0d0;border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#c62828}
+.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:16px}
+.toggle-label{font-size:10px;color:#555;font-weight:700}
+/* TABELA */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;color:#333;vertical-align:middle}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:#f0f7ff}
+tr.div-row td{background:#fff8f5}
+tr.div-row:hover td{background:#fff0e8}
+tr.div-row td:first-child{border-left:3px solid #c62828}
+.lnk{color:#0057b8;cursor:pointer;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.b-blue{background:#e8f0fe;color:#1565c0}
+.b-green{background:#e8f5e9;color:#1b5e20}
+.b-orange{background:#fff3e0;color:#e65100}
+.b-red{background:#ffebee;color:#c62828}
+.b-gray{background:#f5f5f5;color:#555}
+.b-teal{background:#e0f2f1;color:#004d40}
+.b-warn{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.b-purple{background:#f3e5f5;color:#6a1b9a}
+/* DETALHE */
+.detalhe-wrap{display:none;position:fixed;top:46px;right:0;bottom:0;width:520px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.12);z-index:150;flex-direction:column;overflow:hidden}
+.detalhe-wrap.show{display:flex}
+.detalhe-hdr{padding:14px 18px;border-bottom:1px solid #e4e6ea;background:linear-gradient(90deg,#0057b8,#1a9fd4);color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.detalhe-hdr h3{font-size:12px;font-weight:700}
+.detalhe-hdr-sub{font-size:10px;opacity:.85;margin-top:2px}
+.detalhe-close{cursor:pointer;font-size:18px;opacity:.75;background:none;border:none;color:#fff}
+.detalhe-body{flex:1;overflow-y:auto;padding:16px}
+.detalhe-sec{font-size:10px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid #dde8f8}
+.detalhe-sec:first-child{margin-top:0}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.info-item{}
+.info-label{font-size:9px;color:#888;margin-bottom:2px}
+.info-val{font-size:11px;font-weight:700;color:#333}
+/* ITENS TABLE */
+.itens-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
+.itens-table th{background:#f8f9fa;padding:6px 8px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea}
+.itens-table td{padding:6px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.itens-table tr.div-item td{background:#fff5f5}
+/* LOG */
+.log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.log-item:last-child{border:none}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.log-dot.green{background:#1b5e20}
+.log-dot.red{background:#c62828}
+.log-dot.blue{background:#0057b8}
+.log-dot.orange{background:#e65100}
+.log-info{}
+.log-evento{font-size:10px;font-weight:700;color:#333}
+.log-detalhe{font-size:9px;color:#888;margin-top:2px}
+/* OVERLAY DETALHE */
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:140}
+.overlay-bg.show{display:block}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.22);width:400px}
+.mh{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:11px 18px;color:#fff;font-size:12px;font-weight:700}
+.mb{padding:18px}
+.mf{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:center;gap:8px;background:#fafafa}
+.footer{text-align:center;font-size:10px;color:#bbb;padding:14px}
 </style>
 </head>
 <body>
 
+<div class="top-tabs">
+  <button class="top-tab active" id="main-tab-tri" onclick="showMainTab('tri')">Triagem de Devolução</button>
+  <button class="top-tab" id="main-tab-gc" onclick="showMainTab('gc')">Gestão de Caixas</button>
+</div>
 
-
-
+<div class="mod-main active" id="mod-main-tri">
 <div class="main">
 
 <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e4e6ea">
@@ -2481,148 +2601,19 @@ function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textConte
 /* INIT */
 initGestao();
 </script>
-</body>
-</html>
+</div>
 
-</template>
-<template id="tpl-caixas">
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wiser Log — Gestão de Caixas</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
-
-
-.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
-
-
-
-
-
-
-.sb-btn:hover,
-.main{padding:18px}
-.page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:4px}
-.page-sub{font-size:10px;color:#888;margin-bottom:18px}
-/* CARDS RESUMO */
-.resumo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.resumo-card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:14px;text-align:center;border-top:3px solid transparent}
-.resumo-card.rc-blue{border-color:#0057b8}
-.resumo-card.rc-green{border-color:#1b5e20}
-.resumo-card.rc-orange{border-color:#e65100}
-.resumo-card.rc-red{border-color:#c62828}
-.resumo-card .rc-n{font-size:26px;font-weight:700;margin-bottom:4px}
-.resumo-card.rc-blue .rc-n{color:#0057b8}
-.resumo-card.rc-green .rc-n{color:#1b5e20}
-.resumo-card.rc-orange .rc-n{color:#e65100}
-.resumo-card.rc-red .rc-n{color:#c62828}
-.resumo-card .rc-l{font-size:9px;color:#777;line-height:1.4}
-.resumo-card{transition:box-shadow .15s,transform .1s}
-.resumo-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12);transform:translateY(-1px)}
-.resumo-card.rc-active{box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-1px);outline:2px solid currentColor}
-.resumo-card.rc-blue.rc-active{outline-color:#0057b8}
-.resumo-card.rc-green.rc-active{outline-color:#1b5e20}
-.resumo-card.rc-orange.rc-active{outline-color:#e65100}
-.resumo-card.rc-red.rc-active{outline-color:#c62828}
-/* FILTROS */
-.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:18px;margin-bottom:12px}
-.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
-select,input[type=text],input[type=date]{font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;background:#fff;color:#333;height:28px;font-family:Arial}
-.btn{border:none;border-radius:4px;padding:4px 14px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:28px;font-family:Arial}
-.bb{background:#0057b8;color:#fff}.bb:hover{background:#004494}
-.bg{background:#757575;color:#fff}
-.bo{background:#fff;color:#0057b8;border:1px solid #0057b8}
-.btn-sm{height:22px;padding:0 8px;font-size:9px}
-/* TOGGLE */
-.toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
-.toggle{width:32px;height:18px;background:#d0d0d0;border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
-.toggle.on{background:#c62828}
-.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.toggle.on::after{left:16px}
-.toggle-label{font-size:10px;color:#555;font-weight:700}
-/* TABELA */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid #f0f2f5;color:#333;vertical-align:middle}
-tr.clickable{cursor:pointer}
-tr.clickable:hover td{background:#f0f7ff}
-tr.div-row td{background:#fff8f5}
-tr.div-row:hover td{background:#fff0e8}
-tr.div-row td:first-child{border-left:3px solid #c62828}
-.lnk{color:#0057b8;cursor:pointer;font-weight:600}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
-.b-blue{background:#e8f0fe;color:#1565c0}
-.b-green{background:#e8f5e9;color:#1b5e20}
-.b-orange{background:#fff3e0;color:#e65100}
-.b-red{background:#ffebee;color:#c62828}
-.b-gray{background:#f5f5f5;color:#555}
-.b-teal{background:#e0f2f1;color:#004d40}
-.b-warn{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
-.b-purple{background:#f3e5f5;color:#6a1b9a}
-/* DETALHE */
-.detalhe-wrap{display:none;position:fixed;top:46px;right:0;bottom:0;width:520px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.12);z-index:150;flex-direction:column;overflow:hidden}
-.detalhe-wrap.show{display:flex}
-.detalhe-hdr{padding:14px 18px;border-bottom:1px solid #e4e6ea;background:linear-gradient(90deg,#0057b8,#1a9fd4);color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.detalhe-hdr h3{font-size:12px;font-weight:700}
-.detalhe-hdr-sub{font-size:10px;opacity:.85;margin-top:2px}
-.detalhe-close{cursor:pointer;font-size:18px;opacity:.75;background:none;border:none;color:#fff}
-.detalhe-body{flex:1;overflow-y:auto;padding:16px}
-.detalhe-sec{font-size:10px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid #dde8f8}
-.detalhe-sec:first-child{margin-top:0}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.info-item{}
-.info-label{font-size:9px;color:#888;margin-bottom:2px}
-.info-val{font-size:11px;font-weight:700;color:#333}
-/* ITENS TABLE */
-.itens-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
-.itens-table th{background:#f8f9fa;padding:6px 8px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea}
-.itens-table td{padding:6px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
-.itens-table tr.div-item td{background:#fff5f5}
-/* LOG */
-.log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #f5f5f5}
-.log-item:last-child{border:none}
-.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.log-dot.green{background:#1b5e20}
-.log-dot.red{background:#c62828}
-.log-dot.blue{background:#0057b8}
-.log-dot.orange{background:#e65100}
-.log-info{}
-.log-evento{font-size:10px;font-weight:700;color:#333}
-.log-detalhe{font-size:9px;color:#888;margin-top:2px}
-/* OVERLAY DETALHE */
-.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:140}
-.overlay-bg.show{display:block}
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200}
-.overlay.show{display:flex}
-.modal{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.22);width:400px}
-.mh{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:11px 18px;color:#fff;font-size:12px;font-weight:700}
-.mb{padding:18px}
-.mf{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:center;gap:8px;background:#fafafa}
-.footer{text-align:center;font-size:10px;color:#bbb;padding:14px}
-</style>
-</head>
-<body>
-
-
-
-
-
+<div class="mod-main" id="mod-main-gc">
 <div class="main">
   <div class="page-title">GESTÃO DE CAIXAS — TRIAGEM</div>
   <div class="page-sub">Histórico de abertura, fechamento e conteúdo das caixas de triagem</div>
 
   <!-- RESUMO -->
   <div class="resumo-grid">
-    <div class="resumo-card rc-blue" id="rc-card-total" onclick="filtrarPorCard('todos')" style="cursor:pointer" title="Ver todas"><div class="rc-n" id="rc-total">0</div><div class="rc-l">Total de caixas</div></div>
-    <div class="resumo-card rc-green" id="rc-card-abertas" onclick="filtrarPorCard('aberta')" style="cursor:pointer" title="Ver abertas"><div class="rc-n" id="rc-abertas">0</div><div class="rc-l">Caixas abertas</div></div>
-    <div class="resumo-card rc-orange" id="rc-card-fechadas" onclick="filtrarPorCard('fechada')" style="cursor:pointer" title="Ver fechadas"><div class="rc-n" id="rc-fechadas">0</div><div class="rc-l">Caixas fechadas</div></div>
-    <div class="resumo-card rc-red" id="rc-card-div" onclick="filtrarPorCard('divergencias')" style="cursor:pointer" title="Ver com divergências"><div class="rc-n" id="rc-div">0</div><div class="rc-l">Com divergências</div></div>
+    <div class="resumo-card rc-blue" id="rc-card-total" onclick="gc_filtrarPorCard('todos')" style="cursor:pointer" title="Ver todas"><div class="rc-n" id="rc-total">0</div><div class="rc-l">Total de caixas</div></div>
+    <div class="resumo-card rc-green" id="rc-card-abertas" onclick="gc_filtrarPorCard('aberta')" style="cursor:pointer" title="Ver abertas"><div class="rc-n" id="rc-abertas">0</div><div class="rc-l">Caixas abertas</div></div>
+    <div class="resumo-card rc-orange" id="rc-card-fechadas" onclick="gc_filtrarPorCard('fechada')" style="cursor:pointer" title="Ver fechadas"><div class="rc-n" id="rc-fechadas">0</div><div class="rc-l">Caixas fechadas</div></div>
+    <div class="resumo-card rc-red" id="rc-card-div" onclick="gc_filtrarPorCard('divergencias')" style="cursor:pointer" title="Ver com divergências"><div class="rc-n" id="rc-div">0</div><div class="rc-l">Com divergências</div></div>
   </div>
 
   <!-- FILTROS -->
@@ -2648,12 +2639,12 @@ tr.div-row td:first-child{border-left:3px solid #c62828}
       </select>
       <input type="date" id="f-dt-ini" style="width:110px"/>
       <input type="date" id="f-dt-fim" style="width:110px"/>
-      <div class="toggle-wrap" onclick="toggleDiv()">
+      <div class="toggle-wrap" onclick="gc_toggleDiv()">
         <div class="toggle" id="toggle-div"></div>
         <span class="toggle-label">Somente com divergências</span>
       </div>
-      <button class="btn bb" onclick="renderTabela()">🔍 Pesquisar</button>
-      <button class="btn bo" onclick="limpar()">Limpar</button>
+      <button class="btn bb" onclick="gc_renderTabela()">🔍 Pesquisar</button>
+      <button class="btn bo" onclick="gc_limpar()">Limpar</button>
     </div>
   </div>
 
@@ -2684,14 +2675,14 @@ tr.div-row td:first-child{border-left:3px solid #c62828}
 </div>
 
 <!-- DETALHE LATERAL -->
-<div class="overlay-bg" id="overlay-bg" onclick="fecharDetalhe()"></div>
+<div class="overlay-bg" id="overlay-bg" onclick="gc_fecharDetalhe()"></div>
 <div class="detalhe-wrap" id="detalhe-wrap">
   <div class="detalhe-hdr">
     <div>
       <h3 id="detalhe-titulo">Caixa ET-001</h3>
       <div class="detalhe-hdr-sub" id="detalhe-sub">BANC-01 — Produto bom</div>
     </div>
-    <button class="detalhe-close" onclick="fecharDetalhe()">✕</button>
+    <button class="detalhe-close" onclick="gc_fecharDetalhe()">✕</button>
   </div>
   <div class="detalhe-body">
 
@@ -2749,11 +2740,11 @@ tr.div-row td:first-child{border-left:3px solid #c62828}
 </div>
 
 <!-- MODAL ALERTA -->
-<div class="overlay" id="modal-alerta">
+<div class="overlay" id="gc_modal-alerta">
   <div class="modal">
     <div class="mh">Atenção</div>
-    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg"></p></div>
-    <div class="mf"><button class="btn bb" onclick="closeM('modal-alerta')">OK</button></div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="gc_alerta-msg"></p></div>
+    <div class="mf"><button class="btn bb" onclick="gc_closeM('modal-alerta')">OK</button></div>
   </div>
 </div>
 
@@ -2832,28 +2823,28 @@ var caixasData=[
 ];
 
 /* ═══ TOGGLE DIVERGÊNCIAS ═══ */
-function toggleDiv(){
+function gc_toggleDiv(){
   somenteDivergencias=!somenteDivergencias;
   var toggle=document.getElementById('toggle-div');
   if(toggle)toggle.className='toggle'+(somenteDivergencias?' on':'');
-  renderTabela();
+  gc_renderTabela();
 }
 
 /* ═══ RESUMO ═══ */
-function updateResumo(dados){
+function gc_updateResumo(dados){
   var el;
   el=document.getElementById('rc-total');if(el)el.textContent=dados.length;
   el=document.getElementById('rc-abertas');if(el)el.textContent=dados.filter(function(c){return c.status==='aberta';}).length;
   el=document.getElementById('rc-fechadas');if(el)el.textContent=dados.filter(function(c){return c.status==='fechada';}).length;
-  el=document.getElementById('rc-div');if(el)el.textContent=dados.filter(function(c){return temDivergencia(c);}).length;
+  el=document.getElementById('rc-div');if(el)el.textContent=dados.filter(function(c){return gc_temDivergencia(c);}).length;
 }
 
-function temDivergencia(cx){
+function gc_temDivergencia(cx){
   return cx.itens.some(function(it){return it.qtdNF!==it.qtdTriada;});
 }
 
 /* ═══ FILTROS ═══ */
-function limpar(){
+function gc_limpar(){
   document.getElementById('f-bancada').value='';
   document.getElementById('f-end').value='';
   document.getElementById('f-status').value='';
@@ -2862,10 +2853,10 @@ function limpar(){
   document.getElementById('f-dt-fim').value='';
   somenteDivergencias=false;
   document.getElementById('toggle-div').className='toggle';
-  renderTabela();
+  gc_renderTabela();
 }
 
-function filtrar(){
+function gc_filtrar(){
   var bancada=document.getElementById('f-bancada').value;
   var end=document.getElementById('f-end').value.toLowerCase();
   var status=document.getElementById('f-status').value;
@@ -2875,7 +2866,7 @@ function filtrar(){
     if(end&&!cx.end.toLowerCase().includes(end))return false;
     if(status&&cx.status!==status)return false;
     if(statusEstoque&&cx.statusEstoque!==statusEstoque)return false;
-    if(somenteDivergencias&&!temDivergencia(cx))return false;
+    if(somenteDivergencias&&!gc_temDivergencia(cx))return false;
     return true;
   });
 }
@@ -2883,9 +2874,9 @@ function filtrar(){
 /* ═══ TABELA ═══ */
 var colorMapEstoque={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
 
-function renderTabela(){
-  var dados=filtrar();
-  updateResumo(dados);
+function gc_renderTabela(){
+  var dados=gc_filtrar();
+  gc_updateResumo(dados);
   var tbody=document.getElementById('tabela-body');
   var count=document.getElementById('tabela-count');
   if(!tbody)return;
@@ -2898,7 +2889,7 @@ function renderTabela(){
   }
 
   dados.forEach(function(cx){
-    var haDiv=temDivergencia(cx);
+    var haDiv=gc_temDivergencia(cx);
     var tr=document.createElement('tr');
     tr.className='clickable'+(haDiv?' div-row':'');
     tr.title='Clique para ver detalhes';
@@ -2923,15 +2914,15 @@ function renderTabela(){
         '<span style="color:#1b5e20;font-size:10px">✓ Nenhuma</span>')+
       '</td>';
 
-    (function(cxRef){tr.onclick=function(){abrirDetalhe(cxRef);};})(cx);
+    (function(cxRef){tr.onclick=function(){gc_abrirDetalhe(cxRef);};})(cx);
     tbody.appendChild(tr);
   });
 }
 
 /* ═══ DETALHE ═══ */
-function abrirDetalhe(cx){
+function gc_abrirDetalhe(cx){
   caixaDetalhada=cx;
-  var haDiv=temDivergencia(cx);
+  var haDiv=gc_temDivergencia(cx);
 
   // Header
   document.getElementById('detalhe-titulo').textContent='Caixa '+cx.end;
@@ -3020,16 +3011,16 @@ function abrirDetalhe(cx){
   document.getElementById('overlay-bg').classList.add('show');
 }
 
-function fecharDetalhe(){
+function gc_fecharDetalhe(){
   document.getElementById('detalhe-wrap').classList.remove('show');
   document.getElementById('overlay-bg').classList.remove('show');
   caixaDetalhada=null;
 }
 
-function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function gc_closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 
 /* ═══ FILTRAR POR CARD ═══ */
-function filtrarPorCard(tipo){
+function gc_filtrarPorCard(tipo){
   // Resetar filtros do form
   document.getElementById('f-bancada').value='';
   document.getElementById('f-end').value='';
@@ -3053,46 +3044,878 @@ function filtrarPorCard(tipo){
   var activeCard=document.getElementById(mapCard[tipo]);
   if(activeCard)activeCard.classList.add('rc-active');
 
-  renderTabela();
+  gc_renderTabela();
   // Scroll suave até a tabela
   var tabela=document.querySelector('.tbl-wrap');
   if(tabela)tabela.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 /* INIT */
-renderTabela();
+gc_renderTabela();
 
-function showAlerta(msg){var el=document.getElementById('alerta-msg');if(el)el.textContent=msg;document.getElementById('modal-alerta').classList.add('show');}
-function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textContent=msg;document.getElementById('modal-ok').classList.add('show');}
+function gc_showAlerta(msg){var el=document.getElementById('gc_alerta-msg');if(el)el.textContent=msg;document.getElementById('gc_modal-alerta').classList.add('show');}
+function gc_showOK(msg){var el=document.getElementById('gc_ok-msg');if(el)el.textContent=msg;document.getElementById('gc_modal-ok').classList.add('show');}
 </script>
 
 <!-- MODAL OK -->
-<div class="overlay" id="modal-ok">
+<div class="overlay" id="gc_modal-ok">
   <div class="modal" style="width:400px">
     <div class="mh">Sucesso</div>
     <div class="mb" style="text-align:center;padding:20px">
       <div style="width:50px;height:50px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#1b5e20;font-size:22px;font-weight:700">✓</div>
-      <p style="font-size:11px;color:#444" id="ok-msg"></p>
+      <p style="font-size:11px;color:#444" id="gc_ok-msg"></p>
     </div>
-    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-ok')">OK</button></div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="gc_closeM('modal-ok')">OK</button></div>
   </div>
 </div>
 
 <!-- MODAL ALERTA -->
-<div class="overlay" id="modal-alerta">
+<div class="overlay" id="gc_modal-alerta">
   <div class="modal" style="width:400px">
     <div class="mh">Atenção</div>
-    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg"></p></div>
-    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-alerta')">OK</button></div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="gc_alerta-msg"></p></div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="gc_closeM('modal-alerta')">OK</button></div>
   </div>
 </div>
+</div>
+
+<script>
+/* ══ DADOS ══ */
+var gestaoStatus='aguardando', cancelLibId=null, liberarIds=[];
+var nfAtual=null, itemAtual=null, nfEmTriagem=null;
+var caixaParaFechar=null, novaCaixaEndConfirmado=null, novaCaixaCallback=null;
+var bancadaAtual=null;
+var statusFixoNovaCaixa=null;
+
+var bancadas=[
+  {cod:'BANC-01',desc:'Bancada de Triagem 01'}
+];
+
+var enderecosCaixaTriagem=[
+  {cod:'ET-001',desc:'Slot A — Bancada 01',bancada:'BANC-01'},
+  {cod:'ET-002',desc:'Slot B — Bancada 01',bancada:'BANC-01'},
+  {cod:'ET-003',desc:'Slot C — Bancada 01',bancada:'BANC-01'}
+];
+
+var caixas=[];
+
+var nrs=[
+  {id:1,data:'26/05/2026',nr:'NR-00406',nf:'45676/1',serie:'1',cliente:'João Silva',nn:'NN-001',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-001',
+   recebidoEm:'26/05/2026 09:00',recebidoPor:'Operador01',liberadoEm:'',div:false,divObs:'',
+   itens:[
+     {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-002',desc:'Cápsula Vanille 10un',qtd:5,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
+   ]},
+  {id:2,data:'26/05/2026',nr:'NR-00407',nf:'45677/1',serie:'1',cliente:'Maria Santos',nn:'',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-002',
+   recebidoEm:'26/05/2026 09:10',recebidoPor:'Operador01',liberadoEm:'',div:true,divObs:'Embalagem danificada.',
+   itens:[
+     {id:1,pn:'PROD-003',desc:'Sleeve Virtuo',qtd:8,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-004',desc:'Máquina Inissia Branca',qtd:1,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:true,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false}
+   ]},
+  {id:4,data:'25/05/2026',nr:'NR-00405',nf:'45675/2',serie:'2',cliente:'Empresa MNO',nn:'NN-011',
+   status:'liberada',bancada:'BANC-01',vols:3,pedido:'PED-010',
+   recebidoEm:'25/05/2026 08:00',recebidoPor:'Operador01',liberadoEm:'25/05/2026 – Alessandro',div:false,divObs:'',
+   itens:[
+     {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:30,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-006',desc:'Cápsula Roma 10un',qtd:15,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
+   ]}
+];
+
+function today(){return new Date().toLocaleDateString('pt-BR');}
+function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+/* ══ NAVEGAÇÃO ══ */
+var _navHistTri=[];
+var _navHistTri=[];
+function nav(p){
+  var cur=document.querySelector('.page.active');
+  if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+p).classList.add('active');
+  if(p==='gestao'){initGestao();}
+  if(p==='exec'){renderExec();}
+  _updateBackBtnTri();
+  var tG=document.getElementById('tab-gestao');
+  var tE=document.getElementById('tab-exec');
+  if(tG){tG.style.color=p==='gestao'?'#0057b8':'#aaa';tG.style.borderBottomColor=p==='gestao'?'#0057b8':'transparent';}
+  if(tE){tE.style.color=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'#aaa';tE.style.borderBottomColor=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'transparent';}
+}
+function _goBackTri(){
+  if(_navHistTri.length===0)return;
+  var prev=_navHistTri.pop();
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+prev).classList.add('active');
+  if(prev==='gestao')initGestao();
+  if(prev==='exec')renderExec();
+  _updateBackBtnTri();
+}
+function _updateBackBtnTri(){
+  document.querySelectorAll('.back-btn-tri').forEach(function(b){
+    b.style.display=_navHistTri.length>0?'inline-flex':'none';
+  });
+}
+function voltarItens(){if(nfAtual)abrirItens(nfAtual.id);else nav('exec');}
+
+/* ══ SELEÇÃO DE BANCADA ══ */
+function initGestao(){
+  if(bancadas.length===1){
+    selecionarBancada(bancadas[0].cod);
+    return;
+  }
+  // Múltiplas bancadas — mostrar seletor
+  document.getElementById('gestao-bancada-select').style.display='block';
+  document.getElementById('gestao-bancada-content').style.display='none';
+  var lista=document.getElementById('bancada-lista');
+  lista.innerHTML='';
+  bancadas.forEach(function(b){
+    var nrsPend=nrs.filter(function(d){return d.bancada===b.cod&&(d.status==='aguardando'||d.status==='liberada'||d.status==='em-triagem');}).length;
+    var div=document.createElement('div');
+    div.className='bancada-item';
+    div.innerHTML='<div class="bancada-item-info"><div class="bancada-item-cod">'+b.cod+'</div>'+
+      '<div class="bancada-item-desc">'+b.desc+' &nbsp;·&nbsp; '+nrsPend+' NR(s) pendente(s)</div></div>'+
+      '<span style="color:#0057b8;font-size:18px;font-weight:700">›</span>';
+    div.onclick=function(){selecionarBancada(b.cod);};
+    lista.appendChild(div);
+  });
+}
+
+function selecionarBancadaBipe(){
+  var val=document.getElementById('bancada-bipe-input').value.trim().toUpperCase();
+  var b=bancadas.find(function(x){return x.cod.toUpperCase()===val||x.desc.toUpperCase().includes(val);});
+  var erro=document.getElementById('bancada-erro');
+  if(!b){erro.style.display='block';return;}
+  erro.style.display='none';
+  selecionarBancada(b.cod);
+}
+
+function selecionarBancada(cod){
+  var b=bancadas.find(function(x){return x.cod===cod;});
+  if(!b)return;
+  bancadaAtual=b;
+  document.getElementById('gestao-bancada-select').style.display='none';
+  document.getElementById('gestao-bancada-content').style.display='block';
+  var hdrNome=document.getElementById('bancada-hdr-nome');
+  var hdrSub=document.getElementById('bancada-hdr-sub');
+  if(hdrNome)hdrNome.textContent=b.cod+' — '+b.desc;
+  if(hdrSub)hdrSub.textContent='Operador: Alessandro Silveira';
+  updateCounters();renderCaixas();renderGestao();
+}
+
+function trocarBancada(){
+  bancadaAtual=null;
+  document.getElementById('gestao-bancada-select').style.display='block';
+  document.getElementById('gestao-bancada-content').style.display='none';
+  document.getElementById('bancada-bipe-input').value='';
+  initGestao();
+}
+
+/* ══ CONTADORES ══ */
+function updateCounters(){
+  if(!bancadaAtual)return;
+  var ag=nrs.filter(function(d){return d.status==='aguardando'&&d.bancada===bancadaAtual.cod;}).length;
+  var tri=nrs.filter(function(d){return(d.status==='liberada'||d.status==='em-triagem')&&d.bancada===bancadaAtual.cod;}).length;
+  var el;
+  el=document.getElementById('cnt-ag');if(el)el.textContent=ag;
+  el=document.getElementById('cnt-tri');if(el)el.textContent=tri;
+}
+
+/* ══ CAIXAS ══ */
+function renderCaixas(){
+  var content=document.getElementById('caixas-content');
+  if(!content||!bancadaAtual)return;
+  content.innerHTML='';
+  var caixasBancada=caixas.filter(function(c){return c.bancada===bancadaAtual.cod&&!c.fechada;});
+  if(!caixasBancada.length){
+    content.innerHTML='<div style="font-size:10px;color:#aaa;font-style:italic;padding:6px 0">Nenhuma caixa aberta nesta bancada.</div>';
+    return;
+  }
+  // Verificar se há NFs pendentes (para cor dos cards)
+  var temPendente=nrs.some(function(d){return d.status==='em-triagem'&&d.bancada===bancadaAtual.cod;});
+  var colorMap={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
+  var grid=document.createElement('div');
+  grid.className='caixas-grid';
+  caixasBancada.forEach(function(cx){
+    var card=document.createElement('div');
+    var cardClass='caixa-card aberta';
+    if(temPendente)cardClass+=' pendente';
+    card.className=cardClass;
+    var canClose=!temPendente;
+    var closeBtnTitle=canClose?'Fechar caixa':'Existe triagem em andamento. Conclua a triagem ativa para fechar.';
+    card.innerHTML='<div class="caixa-top">'+
+      '<span class="caixa-cod">'+cx.end+'</span>'+
+      '<span class="badge b-green">Aberta</span>'+
+      '</div>'+
+      '<div style="font-size:11px;font-weight:700;color:'+(colorMap[cx.statusEstoque]||'#555')+';margin-bottom:3px">'+cx.statusLabel+'</div>'+
+      '<div class="caixa-info">'+cx.itens.length+' produto(s) alocado(s)</div>'+
+      '<div class="caixa-actions">'+
+      '<button class="btn bo btn-sm" onclick="verCaixa('+cx.id+')">Ver</button>'+
+      '<button class="btn br btn-sm" '+(canClose?'':'disabled title="'+closeBtnTitle+'"')+' onclick="openFecharCaixa('+cx.id+')">🔒 Fechar</button>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+  content.appendChild(grid);
+}
+
+function verCaixa(id){
+  var cx=caixas.find(function(c){return c.id===id;});
+  if(!cx)return;
+  var titulo=document.getElementById('ver-caixa-titulo');
+  if(titulo)titulo.innerHTML=cx.end+' — '+cx.statusLabel+' <button class="mh-x" onclick="closeM(\'modal-ver-caixa\')">✕</button>';
+  var tbody=document.getElementById('ver-caixa-tbody');
+  var empty=document.getElementById('ver-caixa-empty');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(!cx.itens.length){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  cx.itens.forEach(function(it){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+it.pn+'</td><td>'+it.desc+'</td><td>'+it.qtd+(it.divQtd?'<span class="badge b-warn" style="margin-left:4px">⚠ Div.</span>':'')+'</td><td>'+it.nf+'</td><td>'+it.dataHora+'</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('modal-ver-caixa').classList.add('show');
+}
+
+function openNovaCaixa(statusSugerido,callback){
+  novaCaixaEndConfirmado=null;
+  novaCaixaCallback=callback||null;
+  statusFixoNovaCaixa=statusSugerido||null;
+  document.getElementById('nova-caixa-end-bipe').value='';
+  document.getElementById('nova-caixa-end-erro').style.display='none';
+  document.getElementById('nova-caixa-status-wrap').style.display='none';
+  document.getElementById('nova-caixa-status').value=statusSugerido||'';
+  document.getElementById('nova-caixa-status-erro').style.display='none';
+  var infoBox=document.getElementById('nova-caixa-info-box');
+  var labels={bom:'Produto bom',avariado:'Avariado',vencido:'Vencido',destruicao:'Destruição'};
+  if(statusSugerido){
+    infoBox.style.display='block';
+    infoBox.textContent='Não existe caixa aberta para o status "'+labels[statusSugerido]+'". Abra uma caixa para continuar a triagem.';
+    // Bloquear alteração do status
+    document.getElementById('nova-caixa-status').disabled=true;
+  }else{
+    infoBox.style.display='none';
+    document.getElementById('nova-caixa-status').disabled=false;
+  }
+  document.getElementById('modal-nova-caixa').classList.add('show');
+  setTimeout(function(){document.getElementById('nova-caixa-end-bipe').focus();},100);
+}
+
+function validarEndCaixa(){
+  var val=document.getElementById('nova-caixa-end-bipe').value.trim().toUpperCase();
+  var erro=document.getElementById('nova-caixa-end-erro');
+  var end=enderecosCaixaTriagem.find(function(e){return e.cod.toUpperCase()===val;});
+  if(!end){erro.textContent='Endereço não encontrado ou não é do tipo Caixa Triagem.';erro.style.display='block';return;}
+  if(bancadaAtual&&end.bancada!==bancadaAtual.cod){erro.textContent='Este endereço pertence à bancada '+end.bancada+', não à bancada atual.';erro.style.display='block';return;}
+  var jaAberta=caixas.find(function(c){return c.end===end.cod&&c.aberta&&!c.fechada;});
+  if(jaAberta){erro.textContent='Já existe uma caixa aberta neste endereço.';erro.style.display='block';return;}
+  erro.style.display='none';
+  novaCaixaEndConfirmado=end;
+  document.getElementById('nova-caixa-status-wrap').style.display='flex';
+  document.getElementById('nova-caixa-status').focus();
+}
+
+function confirmarNovaCaixa(){
+  if(!novaCaixaEndConfirmado){showAlerta('Informe e confirme o endereço da caixa.');return;}
+  var st=document.getElementById('nova-caixa-status').value;
+  if(!st){showAlerta('Selecione o status de estoque.');return;}
+  var erroSt=document.getElementById('nova-caixa-status-erro');
+  var bancadaCod=bancadaAtual?bancadaAtual.cod:(novaCaixaEndConfirmado.bancada||'');
+  var jaStatus=caixas.find(function(c){return c.statusEstoque===st&&c.bancada===bancadaCod&&c.aberta&&!c.fechada;});
+  if(jaStatus){erroSt.textContent='Já existe caixa aberta para este status ('+jaStatus.end+').';erroSt.style.display='block';return;}
+  erroSt.style.display='none';
+  var labels={bom:'Produto bom',avariado:'Avariado',vencido:'Vencido',destruicao:'Destruição'};
+  var nova={id:Date.now(),end:novaCaixaEndConfirmado.cod,bancada:bancadaCod,statusEstoque:st,statusLabel:labels[st]||st,aberta:true,fechada:false,itens:[]};
+  caixas.push(nova);
+  closeM('modal-nova-caixa');
+  renderCaixas();
+  if(novaCaixaCallback)novaCaixaCallback(nova);
+  else showOK('Caixa '+nova.end+' aberta para status "'+nova.statusLabel+'".');
+}
+
+function openFecharCaixa(id){
+  var cx=caixas.find(function(c){return c.id===id;});if(!cx)return;
+  caixaParaFechar=id;
+  var titulo=document.getElementById('fechar-caixa-titulo');
+  var resumo=document.getElementById('fechar-caixa-resumo');
+  var divAlert=document.getElementById('fechar-div-alert');
+  if(titulo)titulo.textContent='Fechar caixa '+cx.end+'?';
+  if(resumo)resumo.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+    '<div><span style="color:#888">Endereço:</span> <strong>'+cx.end+'</strong></div>'+
+    '<div><span style="color:#888">Status:</span> <strong>'+cx.statusLabel+'</strong></div>'+
+    '<div><span style="color:#888">Produtos:</span> <strong>'+cx.itens.length+'</strong></div>'+
+    '<div><span style="color:#888">Data/Hora:</span> <strong>'+today()+' '+now()+'</strong></div>'+
+    '</div>';
+  var temDiv=cx.itens.some(function(it){return it.divQtd;});
+  if(divAlert)divAlert.style.display=temDiv?'block':'none';
+  if(temDiv){document.getElementById('auth-usuario').value='';document.getElementById('auth-senha').value='';}
+  document.getElementById('modal-fechar-caixa').classList.add('show');
+}
+
+function confirmarFecharCaixa(){
+  var cx=caixas.find(function(c){return c.id===caixaParaFechar;});if(!cx)return;
+  var temDiv=cx.itens.some(function(it){return it.divQtd;});
+  if(temDiv){
+    var u=document.getElementById('auth-usuario').value.trim();
+    var s=document.getElementById('auth-senha').value.trim();
+    if(u!=='supervisor'||s!=='1234'){showAlerta('Credenciais inválidas. Use supervisor / 1234 neste protótipo.');return;}
+  }
+  cx.aberta=false;cx.fechada=true;
+  caixaParaFechar=null;closeM('modal-fechar-caixa');
+  renderCaixas();showOK('Caixa fechada com sucesso! Disponível para remanejamento ao estoque definitivo.');
+}
+
+/* ══ GESTÃO TABELA ══ */
+function filtrarGestao(s){
+  gestaoStatus=s;
+  document.getElementById('g-status').value=s;
+  document.querySelectorAll('.pc').forEach(function(c){c.classList.remove('active');});
+  var map={aguardando:'pc-ag',triagem:'pc-tri'};
+  var el=document.getElementById(map[s]);if(el)el.classList.add('active');
+  gestaoSelecionados=[];renderGestao();
+}
+function onGStatus(){filtrarGestao(document.getElementById('g-status').value);}
+function limparFiltrosGestao(){document.getElementById('g-pesq').value='';document.getElementById('g-dt-ini').value='';document.getElementById('g-dt-fim').value='';renderGestao();}
+
+function getStatusBadge(d){
+  if(d.status==='aguardando')return'<span class="badge b-orange">Aguardando triagem</span>';
+  if(d.status==='liberada')return'<span class="badge b-blue">Liberada para triagem</span>';
+  if(d.status==='em-triagem')return'<span class="badge b-purple">Em triagem</span>';
+  if(d.status==='pendente-alocacao')return'<span class="badge b-teal">Pendente de alocação</span>';
+  return d.status;
+}
+
+var gestaoSelecionados=[];
+
+function renderGestao(){
+  if(!bancadaAtual)return;
+  var pesq=(document.getElementById('g-pesq')||{value:''}).value.toLowerCase();
+  var filtered=nrs.filter(function(d){
+    if(d.bancada!==bancadaAtual.cod)return false;
+    if(gestaoStatus==='aguardando')return d.status==='aguardando';
+    if(gestaoStatus==='triagem')return d.status==='liberada'||d.status==='em-triagem';
+    return false;
+  }).filter(function(d){return!pesq||(d.nr.toLowerCase().includes(pesq)||d.nf.toLowerCase().includes(pesq));});
+
+  var thead=document.getElementById('g-thead');
+  var tbody=document.getElementById('g-tbody');
+  if(!thead||!tbody)return;
+  thead.innerHTML='<th><input type="checkbox" id="g-chk-all" onchange="gSelAll(this.checked)"/></th><th>Data NR</th><th>NR</th><th>NF</th><th>Status</th><th>Ações</th>';
+  tbody.innerHTML='';
+
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum registro para este status.</td></tr>';
+    atualizarToolbar();return;
+  }
+
+  filtered.forEach(function(d){
+    var tr=document.createElement('tr');
+    var divFlag=d.div?'<span class="badge b-warn" style="margin-left:4px" title="'+d.divObs+'">⚠</span>':'';
+    var acoes='';
+    if(d.status==='aguardando'){acoes='<button class="btn bb btn-sm" onclick="openLiberar('+d.id+')">▶ Liberar</button>';}
+    else if(d.status==='liberada'){acoes='<button class="btn br btn-sm" onclick="openCancelLib('+d.id+')">✕ Cancelar lib.</button>';}
+    else if(d.status==='em-triagem'){acoes='<button class="btn btn-sm" style="background:#d0d0d0;color:#888" title="NR em triagem, cancelamento não permitido" disabled>✕ Cancelar lib.</button>';}
+    var tdChk=d.status==='aguardando'?'<input type="checkbox" class="g-chk" '+(gestaoSelecionados.includes(d.id)?'checked':'')+' onchange="gToggleSel('+d.id+',this.checked)"/>':'';
+    tr.innerHTML='<td>'+tdChk+'</td><td>'+d.data+'</td><td><a class="lnk">'+d.nr+'</a>'+divFlag+'</td><td>'+d.nf+'/'+d.serie+'</td><td>'+getStatusBadge(d)+'</td><td>'+acoes+'</td>';
+    tbody.appendChild(tr);
+  });
+  atualizarToolbar();
+}
+
+function atualizarToolbar(){
+  var info=document.getElementById('g-sel-info');
+  var btn=document.getElementById('btn-liberar-lote');
+  var n=gestaoSelecionados.length;
+  if(info)info.textContent=n>0?n+' NR(s) selecionada(s)':'';
+  if(btn){btn.style.display=n>0?'inline-flex':'none';btn.textContent='▶ Liberar selecionadas ('+n+')';}
+}
+function gSelAll(c){gestaoSelecionados=c?nrs.filter(function(d){return d.status==='aguardando'&&(!bancadaAtual||d.bancada===bancadaAtual.cod);}).map(function(d){return d.id;}):[];document.querySelectorAll('.g-chk').forEach(function(el){el.checked=c;});atualizarToolbar();}
+function gToggleSel(id,c){if(c){if(!gestaoSelecionados.includes(id))gestaoSelecionados.push(id);}else{gestaoSelecionados=gestaoSelecionados.filter(function(x){return x!==id;});}atualizarToolbar();}
+
+/* ══ LIBERAR ══ */
+function openLiberar(id){
+  liberarIds=id?[id]:(gestaoSelecionados.length?gestaoSelecionados:[]);
+  if(!liberarIds.length){showAlerta('Selecione ao menos uma NR para liberar.');return;}
+  var targets=nrs.filter(function(d){return liberarIds.includes(d.id);});
+  var titulo=document.getElementById('conf-lib-titulo');
+  var lista=document.getElementById('conf-lib-lista');
+  if(titulo)titulo.textContent='Liberar '+targets.length+' NF'+(targets.length>1?'s':'')+' para triagem';
+  if(lista)lista.innerHTML=targets.map(function(d){
+    return '<div style="padding:4px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between"><span><strong>'+d.nr+'</strong> &nbsp;·&nbsp; NF '+d.nf+'</span><span style="color:#888">'+d.cliente+'</span></div>';
+  }).join('');
+  document.getElementById('modal-conf-lib').classList.add('show');
+}
+
+function confirmarLib(){
+  liberarIds.forEach(function(id){var d=nrs.find(function(x){return x.id===id;});if(d){d.status='liberada';d.liberadoEm=today()+' '+now()+' – Alessandro';}});
+  var count=liberarIds.length;liberarIds=[];gestaoSelecionados=[];
+  closeM('modal-conf-lib');updateCounters();renderGestao();
+  showOK(count+' NF'+(count>1?'s liberadas':' liberada')+' para triagem com sucesso!');
+}
+
+function openCancelLib(id){cancelLibId=id;document.getElementById('modal-cancel-lib').classList.add('show');}
+function confirmarCancelLib(){
+  var d=nrs.find(function(x){return x.id===cancelLibId;});if(d){d.status='aguardando';d.liberadoEm='';}
+  cancelLibId=null;closeM('modal-cancel-lib');updateCounters();renderGestao();
+}
+
+/* ══ EXECUTAR ══ */
+function renderExec(){
+  var lista=document.getElementById('exec-lista');if(!lista)return;
+  lista.innerHTML='';
+  var disponiveis=nrs.filter(function(d){return d.status==='liberada';});
+  if(!disponiveis.length){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:30px;font-style:italic;font-size:11px">Nenhuma NF disponível para triagem.</div>';return;}
+  disponiveis.forEach(function(d){
+    var div=document.createElement('div');div.className='nf-item';
+    div.innerHTML='<div style="flex-shrink:0"><button class="btn bb btn-sm" onclick="event.stopPropagation();abrirNF('+d.id+')">Selecionar</button></div>'+
+      '<div class="nf-info"><div class="nf-id">NF '+d.nf+'/'+d.serie+'</div>'+
+      '<div class="nf-meta">NR: '+d.nr+' &nbsp;·&nbsp; '+d.itens.length+' produto(s) &nbsp;·&nbsp; '+d.cliente+'</div></div>'+
+      '<div style="color:#0057b8;font-size:18px;font-weight:700">›</div>';
+    div.onclick=function(){abrirNF(d.id);};lista.appendChild(div);
+  });
+}
+
+function pesquisarExec(){
+  var pesq=document.getElementById('exec-pesq').value.toLowerCase();
+  var lista=document.getElementById('exec-lista');
+  var noResult=document.getElementById('exec-no-result');
+  if(!pesq){renderExec();noResult.style.display='none';return;}
+  var found=nrs.filter(function(d){return d.status==='liberada'&&(d.nf.toLowerCase().includes(pesq)||d.nr.toLowerCase().includes(pesq)||(d.pedido||'').toLowerCase().includes(pesq));});
+  noResult.style.display=found.length?'none':'block';
+  lista.innerHTML='';
+  found.forEach(function(d){
+    var div=document.createElement('div');div.className='nf-item';
+    div.innerHTML='<div style="flex-shrink:0"><button class="btn bb btn-sm" onclick="event.stopPropagation();abrirNF('+d.id+')">Selecionar</button></div>'+
+      '<div class="nf-info"><div class="nf-id">NF '+d.nf+'/'+d.serie+'</div>'+
+      '<div class="nf-meta">NR: '+d.nr+' &nbsp;·&nbsp; '+d.itens.length+' produto(s)</div></div>'+
+      '<div style="color:#0057b8;font-size:18px;font-weight:700">›</div>';
+    div.onclick=function(){abrirNF(d.id);};lista.appendChild(div);
+  });
+}
+
+function abrirNF(id){
+  var d=nrs.find(function(x){return x.id===id;});if(!d)return;
+  if(nfEmTriagem&&nfEmTriagem!==id){var em=nrs.find(function(x){return x.id===nfEmTriagem;});showAlerta('Finalize a triagem da NF '+(em?em.nf:'em andamento')+' antes de iniciar outra.');return;}
+  if(d.status==='em-triagem'&&nfEmTriagem!==id){showAlerta('Esta NF já está em triagem por outro operador.');return;}
+  d.status='em-triagem';nfEmTriagem=id;nfAtual=d;
+  var itPend=d.itens.filter(function(it){return it.status==='pend';});
+  if(itPend.length===1&&d.itens.every(function(it){return it.status!=='triando';})){abrirItem(id,itPend[0].id);return;}
+  abrirItens(id);
+}
+
+/* ══ ITENS ══ */
+function abrirItens(nfId){
+  var d=nrs.find(function(x){return x.id===nfId;});if(!d)return;
+  nfAtual=d;
+  document.getElementById('itens-titulo').textContent='Produtos — NF '+d.nf+'/'+d.serie+' · '+d.nr+' · '+d.cliente;
+  var divDiv=document.getElementById('itens-obs-div');
+  divDiv.style.display=d.div?'block':'none';
+  divDiv.innerHTML=d.div?'<div class="obs-box" style="margin-bottom:12px">⚠ <strong>NR com itens divergentes.</strong> '+d.divObs+'</div>':'';
+  var lista=document.getElementById('itens-lista');lista.innerHTML='';
+  // Ordenar: pendentes primeiro, concluídos por último
+  var itensOrdenados=d.itens.slice().sort(function(a,b){
+    if(a.status==='conc'&&b.status!=='conc')return 1;
+    if(a.status!=='conc'&&b.status==='conc')return -1;
+    return 0;
+  });
+  itensOrdenados.forEach(function(it){
+    var isConc=it.status==='conc';
+    var div=document.createElement('div');
+    div.className='item-row'+(isConc?' done':'');
+    var badge=isConc?'<span class="badge b-green">✓ Triado → '+it.endTri+'</span>':'<span class="badge b-orange">Pendente</span>';
+    div.innerHTML='<div><button class="btn bb btn-sm"'+(isConc?' disabled':'')+' onclick="event.stopPropagation();abrirItem('+nfId+','+it.id+')">Selecionar</button></div>'+
+      '<div class="item-row-info"><div class="item-pn">'+it.pn+' — '+it.desc+'</div>'+
+      '<div class="item-desc">Qtde esperada: '+it.qtd+(isConc?' &nbsp;·&nbsp; Triado: '+it.qtdTriada+' &nbsp;·&nbsp; '+it.endTri:'')+'</div></div>'+badge;
+    if(!isConc)div.onclick=function(){abrirItem(nfId,it.id);};
+    lista.appendChild(div);
+  });
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-itens').classList.add('active');
+}
+
+/* ══ TRIAGEM ITEM ══ */
+function abrirItem(nfId,itemId){
+  var d=nrs.find(function(x){return x.id===nfId;});if(!d)return;
+  var it=d.itens.find(function(x){return x.id===itemId;});if(!it)return;
+  nfAtual=d;itemAtual=it;
+  document.getElementById('ti-titulo').textContent='Triagem — '+it.pn;
+  document.getElementById('ti-prod-titulo').textContent=it.pn+' — '+it.desc;
+  document.getElementById('ti-qtd-esp').textContent=it.qtd;
+  document.getElementById('ti-nr').textContent=d.nr;
+  document.getElementById('ti-nf').textContent=d.nf+'/'+d.serie;
+  document.getElementById('ti-cliente').textContent=d.cliente;
+  document.getElementById('ti-end').textContent=d.bancada||(bancadaAtual?bancadaAtual.cod:'—');
+  ['ti-qtd','ti-lote','ti-val','ti-fab','ti-serie'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ti-status-estoque').value='';
+  document.getElementById('ti-caixa-info').textContent='Selecione o status de estoque';
+  document.getElementById('ti-lote-field').style.display=it.controlaLote?'flex':'none';
+  document.getElementById('ti-val-field').style.display=it.controlaVal?'flex':'none';
+  document.getElementById('ti-fab-field').style.display=it.controlaFab?'flex':'none';
+  document.getElementById('ti-serie-field').style.display=it.controlaSerie?'flex':'none';
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-triagem-item').classList.add('active');
+  setTimeout(function(){document.getElementById('ti-qtd').focus();},100);
+}
+
+function onStatusEstoque(){
+  var st=document.getElementById('ti-status-estoque').value;
+  var infoEl=document.getElementById('ti-caixa-info');
+  if(!st){infoEl.textContent='Selecione o status de estoque';return;}
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(cx){infoEl.innerHTML='<span style="color:#1b5e20;font-weight:700">✓ '+cx.end+' — '+cx.statusLabel+'</span>';}
+  else{infoEl.innerHTML='<span style="color:#c62828">Nenhuma caixa aberta para este status — será solicitada abertura ao confirmar</span>';}
+}
+
+function salvarItem(){
+  var qtd=parseInt(document.getElementById('ti-qtd').value);
+  var st=document.getElementById('ti-status-estoque').value;
+  if(!qtd||qtd<1){showAlerta('Informe a quantidade triada.');return;}
+  if(!st){showAlerta('Selecione o status de estoque.');return;}
+  if(itemAtual.controlaSerie&&!document.getElementById('ti-serie').value.trim()){showAlerta('O número de série é obrigatório para este produto.');return;}
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(!cx){openNovaCaixa(st,function(novaCx){concluirItemNaCaixa(st,qtd);});return;}
+  concluirItemNaCaixa(st,qtd);
+}
+
+function concluirItemNaCaixa(st,qtd){
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(!cx){showAlerta('Caixa não encontrada. Tente novamente.');return;}
+  var divQtd=qtd!==itemAtual.qtd;
+  itemAtual.status='conc';itemAtual.endTri=cx.end;
+  itemAtual.lote=document.getElementById('ti-lote').value;
+  itemAtual.val=document.getElementById('ti-val').value;
+  itemAtual.fab=document.getElementById('ti-fab').value;
+  itemAtual.serie=document.getElementById('ti-serie').value;
+  itemAtual.qtdTriada=qtd;itemAtual.divQtd=divQtd;
+  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:qtd,nf:nfAtual.nf,dataHora:today().replace(/\//g,'/')+' '+now(),divQtd:divQtd});
+  // Atualizar caixas na gestão se divergência
+  if(divQtd){cx.itens[cx.itens.length-1].divQtd=true;}
+  var todos=nfAtual.itens.every(function(it){return it.status==='conc';});
+  if(todos){
+    nfAtual.status='pendente-alocacao';nfEmTriagem=null;
+    updateCounters();renderCaixas();
+    showOK('Triagem da NF '+nfAtual.nf+' concluída! Status: "Pendente de alocação".');
+    nfAtual=null;itemAtual=null;nav('exec');
+  }else{abrirItens(nfAtual.id);}
+}
+
+function cancelarItem(){
+  if(itemAtual)itemAtual.status='pend';
+  var algumAtivo=nfAtual&&nfAtual.itens.some(function(it){return it.status==='triando'||it.status==='conc';});
+  if(!algumAtivo&&nfAtual){nfAtual.status='liberada';nfEmTriagem=null;}
+  itemAtual=null;
+  if(nfAtual)abrirItens(nfAtual.id);else nav('exec');
+}
+
+/* ══ UTILS ══ */
+function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function showAlerta(msg){var el=document.getElementById('alerta-msg');if(el)el.textContent=msg;document.getElementById('modal-alerta').classList.add('show');}
+function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textContent=msg;document.getElementById('modal-ok').classList.add('show');}
+
+/* INIT */
+initGestao();
+
+/* ══ SINCRONIZAÇÃO TRIAGEM → GESTÃO DE CAIXAS ══ */
+var caixasData = [];
+
+function syncCaixasData() {
+  caixasData = caixas.map(function(cx) {
+    var bancCod  = bancadaAtual ? bancadaAtual.cod  : (cx.bancada || 'BANC-01');
+    var bancNome = bancadaAtual ? bancadaAtual.desc : 'Bancada de Triagem 01';
+    return {
+      id: cx.id,
+      end: cx.end,
+      bancada: bancCod,
+      descBancada: bancNome,
+      statusEstoque: cx.statusEstoque,
+      statusLabel: cx.statusLabel,
+      status: cx.fechada ? 'fechada' : 'aberta',
+      dtAbertura: cx.dtAbertura || (today() + ' ' + now()),
+      dtFechamento: cx.dtFechamento || '',
+      abertaPor: cx.abertaPor || 'Alessandro Silveira',
+      fechadaPor: cx.fechadaPor || '',
+      autorizacaoSupervisor: cx.autorizacaoSupervisor || null,
+      itens: (cx.itens || []).map(function(it) {
+        return {
+          pn: it.pn,
+          desc: it.desc,
+          nf: it.nf,
+          qtdNF: it.qtd,
+          qtdTriada: it.qtdTriada !== undefined ? it.qtdTriada : it.qtd,
+          dataHora: it.dataHora || (today() + ' ' + now()),
+          divQtd: it.divQtd || false
+        };
+      }),
+      log: cx.log || [{
+        tipo:'abertura', evento:'Caixa aberta',
+        detalhe:'Operador: Alessandro Silveira',
+        dataHora: cx.dtAbertura || (today() + ' ' + now())
+      }]
+    };
+  });
+}
+
+function showMainTab(key) {
+  document.querySelectorAll('.mod-main').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.top-tab').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('mod-main-' + key).classList.add('active');
+  document.getElementById('main-tab-' + key).classList.add('active');
+  if (key === 'gc') {
+    syncCaixasData();
+    gc_renderTabela();
+    gc_updateResumo(caixasData);
+  }
+}
+
+var somenteDivergencias=false;
+var caixaDetalhada=null;
+
+/* ═══ DADOS ═══ */
+/* caixasData injetado pela triagem */
+
+/* ═══ TOGGLE DIVERGÊNCIAS ═══ */
+function gc_toggleDiv(){
+  somenteDivergencias=!somenteDivergencias;
+  var toggle=document.getElementById('toggle-div');
+  if(toggle)toggle.className='toggle'+(somenteDivergencias?' on':'');
+  gc_renderTabela();
+}
+
+/* ═══ RESUMO ═══ */
+function gc_updateResumo(dados){
+  var el;
+  el=document.getElementById('rc-total');if(el)el.textContent=dados.length;
+  el=document.getElementById('rc-abertas');if(el)el.textContent=dados.filter(function(c){return c.status==='aberta';}).length;
+  el=document.getElementById('rc-fechadas');if(el)el.textContent=dados.filter(function(c){return c.status==='fechada';}).length;
+  el=document.getElementById('rc-div');if(el)el.textContent=dados.filter(function(c){return gc_temDivergencia(c);}).length;
+}
+
+function gc_temDivergencia(cx){
+  return cx.itens.some(function(it){return it.qtdNF!==it.qtdTriada;});
+}
+
+/* ═══ FILTROS ═══ */
+function gc_limpar(){
+  document.getElementById('f-bancada').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-status-estoque').value='';
+  document.getElementById('f-dt-ini').value='';
+  document.getElementById('f-dt-fim').value='';
+  somenteDivergencias=false;
+  document.getElementById('toggle-div').className='toggle';
+  gc_renderTabela();
+}
+
+function gc_filtrar(){
+  var bancada=document.getElementById('f-bancada').value;
+  var end=document.getElementById('f-end').value.toLowerCase();
+  var status=document.getElementById('f-status').value;
+  var statusEstoque=document.getElementById('f-status-estoque').value;
+  return caixasData.filter(function(cx){
+    if(bancada&&cx.bancada!==bancada)return false;
+    if(end&&!cx.end.toLowerCase().includes(end))return false;
+    if(status&&cx.status!==status)return false;
+    if(statusEstoque&&cx.statusEstoque!==statusEstoque)return false;
+    if(somenteDivergencias&&!gc_temDivergencia(cx))return false;
+    return true;
+  });
+}
+
+/* ═══ TABELA ═══ */
+var colorMapEstoque={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
+
+function gc_renderTabela(){
+  var dados=gc_filtrar();
+  gc_updateResumo(dados);
+  var tbody=document.getElementById('tabela-body');
+  var count=document.getElementById('tabela-count');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(count)count.textContent=dados.length+' registro(s) encontrado(s)';
+
+  if(!dados.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+
+  dados.forEach(function(cx){
+    var haDiv=gc_temDivergencia(cx);
+    var tr=document.createElement('tr');
+    tr.className='clickable'+(haDiv?' div-row':'');
+    tr.title='Clique para ver detalhes';
+
+    var statusCaixaBadge=cx.status==='aberta'
+      ?'<span class="badge b-green">Aberta</span>'
+      :'<span class="badge b-gray">Fechada</span>';
+    var divBadge=haDiv?'<span class="badge b-warn" style="margin-left:5px">⚠ Div.</span>':'';
+    var estoqueBadge='<span style="font-weight:700;color:'+(colorMapEstoque[cx.statusEstoque]||'#555')+'">'+cx.statusLabel+'</span>';
+
+    tr.innerHTML=
+      '<td><a class="lnk">'+cx.end+'</a></td>'+
+      '<td>'+cx.bancada+'</td>'+
+      '<td>'+estoqueBadge+'</td>'+
+      '<td>'+statusCaixaBadge+divBadge+'</td>'+
+      '<td>'+cx.dtAbertura+'</td>'+
+      '<td>'+(cx.dtFechamento||'<span style="color:#aaa">—</span>')+'</td>'+
+      '<td style="font-size:9px;color:#555">'+cx.abertaPor+'</td>'+
+      '<td style="text-align:center">'+cx.itens.length+'</td>'+
+      '<td style="text-align:center">'+
+        (haDiv?'<span class="badge b-warn">'+cx.itens.filter(function(it){return it.qtdNF!==it.qtdTriada;}).length+' item(s)</span>':
+        '<span style="color:#1b5e20;font-size:10px">✓ Nenhuma</span>')+
+      '</td>';
+
+    (function(cxRef){tr.onclick=function(){gc_abrirDetalhe(cxRef);};})(cx);
+    tbody.appendChild(tr);
+  });
+}
+
+/* ═══ DETALHE ═══ */
+function gc_abrirDetalhe(cx){
+  caixaDetalhada=cx;
+  var haDiv=gc_temDivergencia(cx);
+
+  // Header
+  document.getElementById('detalhe-titulo').textContent='Caixa '+cx.end;
+  document.getElementById('detalhe-sub').textContent=cx.bancada+' — '+cx.descBancada+' — '+cx.statusLabel;
+
+  // Identificação
+  document.getElementById('d-end').textContent=cx.end;
+  document.getElementById('d-bancada').textContent=cx.bancada+' — '+cx.descBancada;
+  document.getElementById('d-status-estoque').innerHTML='<span style="color:'+(colorMapEstoque[cx.statusEstoque]||'#555')+';font-weight:700">'+cx.statusLabel+'</span>';
+  document.getElementById('d-status-caixa').innerHTML=cx.status==='aberta'
+    ?'<span class="badge b-green">Aberta</span>'
+    :'<span class="badge b-gray">Fechada</span>';
+  document.getElementById('d-dt-abertura').textContent=cx.dtAbertura;
+  document.getElementById('d-dt-fechamento').textContent=cx.dtFechamento||'—';
+  document.getElementById('d-aberta-por').textContent=cx.abertaPor;
+  document.getElementById('d-fechada-por').textContent=cx.fechadaPor||'—';
+
+  // Autorização por supervisor
+  var authWrap=document.getElementById('d-autorizacao-wrap');
+  if(cx.autorizacaoSupervisor&&cx.fechadaPor){
+    authWrap.style.display='block';
+    document.getElementById('d-supervisor').textContent=cx.autorizacaoSupervisor.supervisor;
+    document.getElementById('d-dt-autorizacao').textContent=cx.autorizacaoSupervisor.dataHora;
+    document.getElementById('d-autorizacao-motivo').textContent=cx.autorizacaoSupervisor.motivo;
+  }else{
+    authWrap.style.display='none';
+  }
+
+  // Itens
+  var tbody=document.getElementById('d-itens-tbody');
+  var empty=document.getElementById('d-itens-empty');
+  tbody.innerHTML='';
+  if(!cx.itens.length){empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    cx.itens.forEach(function(it){
+      var isDiv=it.qtdNF!==it.qtdTriada;
+      var tr=document.createElement('tr');
+      if(isDiv)tr.className='div-item';
+      var diff=it.qtdTriada-it.qtdNF;
+      var diffStr=isDiv?'<span style="color:#c62828;font-size:9px;font-weight:700">('+( diff>0?'+':'')+diff+')</span>':'';
+      tr.innerHTML='<td>'+it.pn+'</td><td>'+it.desc+'</td><td>'+it.nf+'</td>'+
+        '<td style="text-align:center">'+it.qtdNF+'</td>'+
+        '<td style="text-align:center;font-weight:700;color:'+(isDiv?'#c62828':'#1b5e20')+'">'+it.qtdTriada+' '+diffStr+'</td>'+
+        '<td>'+it.dataHora+'</td>'+
+        '<td>'+(isDiv?'<span class="badge b-warn">⚠ Div.</span>':'<span class="badge b-green">✓</span>')+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Seção divergências
+  var divSection=document.getElementById('d-div-section');
+  var divLista=document.getElementById('d-div-lista');
+  if(haDiv){
+    divSection.style.display='block';
+    var divs=cx.itens.filter(function(it){return it.qtdNF!==it.qtdTriada;});
+    divLista.innerHTML=divs.map(function(it){
+      var diff=it.qtdTriada-it.qtdNF;
+      return '<div style="background:#fff5f5;border:1px solid #ffcdd2;border-radius:4px;padding:8px 12px;margin-bottom:6px;font-size:10px">'+
+        '<div style="font-weight:700;color:#c62828;margin-bottom:3px">'+it.pn+' — '+it.desc+'</div>'+
+        '<div style="color:#555">Qtde esperada (NF): <strong>'+it.qtdNF+'</strong> &nbsp;·&nbsp; Qtde triada: <strong>'+it.qtdTriada+'</strong> &nbsp;·&nbsp; Diferença: <strong style="color:#c62828">'+(diff>0?'+':'')+diff+'</strong></div>'+
+        '<div style="color:#888;margin-top:2px">NF: '+it.nf+' &nbsp;·&nbsp; '+it.dataHora+'</div>'+
+        '</div>';
+    }).join('');
+  }else{
+    divSection.style.display='none';
+  }
+
+  // Log
+  var logEl=document.getElementById('d-log');
+  var dotColors={abertura:'green',fechamento:'red',alocacao:'blue',divergencia:'orange',autorizacao:'orange'};
+  logEl.innerHTML='';
+  cx.log.forEach(function(ev){
+    var div=document.createElement('div');
+    div.className='log-item';
+    div.innerHTML='<div class="log-dot '+(dotColors[ev.tipo]||'blue')+'"></div>'+
+      '<div class="log-info">'+
+      '<div class="log-evento">'+ev.evento+'</div>'+
+      '<div class="log-detalhe">'+ev.detalhe+'</div>'+
+      '<div class="log-detalhe" style="color:#aaa;margin-top:2px">'+ev.dataHora+'</div>'+
+      '</div>';
+    logEl.appendChild(div);
+  });
+
+  document.getElementById('detalhe-wrap').classList.add('show');
+  document.getElementById('overlay-bg').classList.add('show');
+}
+
+function gc_fecharDetalhe(){
+  document.getElementById('detalhe-wrap').classList.remove('show');
+  document.getElementById('overlay-bg').classList.remove('show');
+  caixaDetalhada=null;
+}
+
+function gc_closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+
+/* ═══ FILTRAR POR CARD ═══ */
+function gc_filtrarPorCard(tipo){
+  // Resetar filtros do form
+  document.getElementById('f-bancada').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-status-estoque').value='';
+  document.getElementById('f-dt-ini').value='';
+  document.getElementById('f-dt-fim').value='';
+  somenteDivergencias=false;
+  document.getElementById('toggle-div').className='toggle';
+
+  // Aplicar filtro do card
+  if(tipo==='aberta')document.getElementById('f-status').value='aberta';
+  else if(tipo==='fechada')document.getElementById('f-status').value='fechada';
+  else if(tipo==='divergencias'){somenteDivergencias=true;document.getElementById('toggle-div').className='toggle on';}
+
+  // Destacar card ativo
+  ['rc-card-total','rc-card-abertas','rc-card-fechadas','rc-card-div'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove('rc-active');
+  });
+  var mapCard={todos:'rc-card-total',aberta:'rc-card-abertas',fechada:'rc-card-fechadas',divergencias:'rc-card-div'};
+  var activeCard=document.getElementById(mapCard[tipo]);
+  if(activeCard)activeCard.classList.add('rc-active');
+
+  gc_renderTabela();
+  // Scroll suave até a tabela
+  var tabela=document.querySelector('.tbl-wrap');
+  if(tabela)tabela.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* INIT */
+
+function gc_showAlerta(msg){var el=document.getElementById('gc_alerta-msg');if(el)el.textContent=msg;document.getElementById('gc_modal-alerta').classList.add('show');}
+function gc_showOK(msg){var el=document.getElementById('gc_ok-msg');if(el)el.textContent=msg;document.getElementById('gc_modal-ok').classList.add('show');}
+syncCaixasData();
+</script>
 </body>
 </html>
-
 </template>
 
 <script>
-var labels={'ger':'Gerenciador de Devolução','rem':'Remanejamento Devolução','tri':'Triagem de Devolução','caixas':'Gestão de Caixas'};
+var labels={'ger':'Gerenciador de Devolução','rem':'Remanejamento Devolução','tri':'Triagem e Gestão de Caixas'};
 var cur='ger';
 var loaded={};
 function go(k){
