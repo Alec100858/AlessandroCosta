@@ -1,0 +1,3114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiser Log — Módulo de Devolução</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f5}
+.hdr{height:46px;background:linear-gradient(90deg,#0057b8 60%,#1a9fd4);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.hdr-logo{color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+.hdr-sep{color:rgba(255,255,255,.25);margin:0 4px}
+.hdr-mod{color:rgba(255,255,255,.85);font-size:11px;font-weight:600}
+.hdr-right{margin-left:auto;color:#fff;font-size:10px;display:flex;align-items:center;gap:8px}
+.hdr-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#26c281);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.body{display:flex;flex:1;overflow:hidden}
+.sb{width:56px;background:#fff;border-right:1px solid #e4e6ea;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:4px;flex-shrink:0}
+.sb-btn{width:44px;height:48px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;gap:3px;transition:background .15s;flex-shrink:0}
+.sb-btn:hover{background:#f0f7ff}
+.sb-btn.active{background:#e8f0fe}
+.sb-icon{font-size:20px;color:#aaa;line-height:1}
+.sb-btn.active .sb-icon{color:#0057b8}
+.sb-lbl{font-size:7px;color:#bbb;text-align:center;line-height:1.2}
+.sb-btn.active .sb-lbl{color:#0057b8;font-weight:700}
+.frames{flex:1;position:relative}
+iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none}
+iframe.active{display:block}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-logo"><span>W/</span>WISER LOG</div>
+  <span class="hdr-sep">|</span>
+  <span class="hdr-mod" id="hdr-mod">Gerenciador de Devolução</span>
+  <div class="hdr-right"><div class="hdr-av">AS</div><span>Nespresso – Alessandro Silveira</span></div>
+</div>
+<div class="body">
+  <div class="sb">
+    <button class="sb-btn active" id="sb-ger" onclick="go('ger')" title="Gerenciador de Devolução"><span class="sb-icon">⊞</span><span class="sb-lbl">Gerenc.</span></button>
+    <button class="sb-btn" id="sb-rem" onclick="go('rem')" title="Remanejamento Devolução"><span class="sb-icon">⇄</span><span class="sb-lbl">Remanej.</span></button>
+    <button class="sb-btn" id="sb-tri" onclick="go('tri')" title="Triagem de Devolução"><span class="sb-icon">⚙</span><span class="sb-lbl">Triagem</span></button>
+    <button class="sb-btn" id="sb-caixas" onclick="go('caixas')" title="Gestão de Caixas"><span class="sb-icon">📦</span><span class="sb-lbl">Caixas</span></button>
+  </div>
+  <div class="frames">
+    <iframe id="fr-ger" class="active"></iframe>
+    <iframe id="fr-rem"></iframe>
+    <iframe id="fr-tri"></iframe>
+    <iframe id="fr-caixas"></iframe>
+  </div>
+</div>
+<template id="tpl-ger">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Wiser Log — Gerenciador de Devolução</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5;overflow-x:hidden}
+
+
+
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+
+
+
+
+
+
+
+.sb-btn:hover,
+
+.main{padding:18px;background:#f0f2f5;min-height:calc(100vh - 46px);}
+.page{display:none}.page.active{display:block}
+.bread{font-size:10px;color:#aaa;margin-bottom:6px}
+.bread a{color:#0057b8;cursor:pointer;text-decoration:none}
+.page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:18px;margin-bottom:14px;max-width:100%}
+
+/* PAINEL */
+.panel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;max-width:100%}
+.pc{background:#fff;border-radius:6px;padding:16px 14px;cursor:pointer;border:2px solid transparent;transition:all .15s;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.pc:hover{box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.pc.active{box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.pc .n{font-size:30px;font-weight:700;line-height:1.1}
+.pc .l{font-size:9px;color:#777;margin-top:6px;line-height:1.5}
+.pc-1 .n{color:#1565c0}.pc-1.active{border-color:#1565c0;background:#e8f0fe}
+.pc-2 .n{color:#bf360c}.pc-2.active{border-color:#bf360c;background:#fbe9e7}
+.pc-3 .n{color:#1b5e20}.pc-3.active{border-color:#1b5e20;background:#e8f5e9}
+.pc-4 .n{color:#c62828}.pc-4.active{border-color:#c62828;background:#ffebee}
+
+/* FILTROS */
+.filters{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #f0f0f0;margin-bottom:14px}
+select,input[type=text],input[type=date],input[type=number]{font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;background:#fff;color:#333;height:28px;font-family:Arial;transition:border .15s}
+select:focus,input:focus{outline:none;border-color:#0057b8}
+
+/* BOTÕES */
+.btn{border:none;border-radius:4px;padding:4px 14px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:28px;font-family:Arial;transition:all .15s}
+.bb{background:#0057b8;color:#fff}.bb:hover{background:#004494}
+.bg{background:#757575;color:#fff}
+.br{background:#c62828;color:#fff}
+.bk{background:#1b5e20;color:#fff}.bk:hover{background:#154d19}
+.bo{background:#fff;color:#0057b8;border:1px solid #0057b8}.bo:hover{background:#e8f0fe}
+.btn-sm{height:22px;padding:0 9px;font-size:9px}
+.btn:disabled{background:#d0d0d0;color:#888;cursor:not-allowed;border-color:#d0d0d0}
+
+/* TABELA GERENCIADOR */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;color:#333;vertical-align:middle;white-space:nowrap}
+tr:hover td{background:#fafbfc}
+input[type=checkbox]{width:12px;height:12px;accent-color:#0057b8;cursor:pointer}
+.lnk{color:#0057b8;cursor:pointer;font-weight:600}.lnk:hover{text-decoration:underline}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.b-blue{background:#e8f0fe;color:#1565c0}
+.b-red{background:#fbe9e7;color:#bf360c}
+.b-green{background:#e8f5e9;color:#1b5e20}
+.b-warn{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.b-teal{background:#e0f2f1;color:#004d40}
+.b-orange{background:#fff3e0;color:#e65100}
+
+/* FORM NR */
+.form-wrap{max-width:960px;width:100%;box-sizing:border-box}
+.form-wrap .card{overflow-x:auto}
+
+/* CHECKBOX INSUCESSO */
+.insucesso-bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:#e8f0fe;border:1px solid #c5d8f5;border-radius:5px;margin-bottom:18px;cursor:pointer;user-select:none}
+.insucesso-bar label{font-size:11px;font-weight:700;color:#1565c0;cursor:pointer}
+.insucesso-bar .hint-ins{font-size:10px;color:#5c7fb8;margin-left:4px;font-style:italic}
+.chk-ins{width:15px;height:15px;accent-color:#0057b8;cursor:pointer;flex-shrink:0}
+
+/* SEÇÕES DO FORM */
+.form-sec{margin-bottom:18px}
+.form-sec-title{font-size:10px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #dde8f8}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+.g5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:14px}
+.f-item{display:flex;flex-direction:column;gap:4px}
+label.fl{font-size:10px;color:#555;font-weight:700}
+.req{color:#c62828;margin-left:2px}
+.opt{color:#aaa;font-weight:400;font-size:9px;margin-left:3px}
+.hint{font-size:9px;color:#888;margin-top:2px;font-style:italic}
+.f-disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
+.info-box{background:#e8f0fe;border-left:3px solid #0057b8;padding:10px 14px;border-radius:0 4px 4px 0;font-size:10px;color:#1565c0;margin-bottom:16px;line-height:1.6}
+.warn-box{background:#fff8e1;border-left:3px solid #f9a825;padding:10px 14px;border-radius:0 4px 4px 0;font-size:10px;color:#e65100;margin-bottom:16px;line-height:1.6}
+
+/* REPLICAR BTN */
+.replicar-row{display:flex;align-items:flex-end;gap:8px}
+.replicar-row .f-item{flex:1}
+
+/* ITENS TABLE */
+.items-wrap{border:1px solid #e4e6ea;border-radius:5px;overflow:hidden;margin-top:8px}
+.items-wrap .tbl-scroll{overflow-x:auto;width:100%}
+.items-tbl{width:100%;border-collapse:collapse;font-size:10px}
+.items-tbl th{background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:1px solid #e4e6ea}
+.items-tbl td{padding:7px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+.items-tbl tr:last-child td{border-bottom:none}
+.items-tbl tr:hover td{background:#fafafa}
+.items-tbl input[type=text]{width:100%;border:1px solid #d8dde6;border-radius:3px;padding:3px 6px;height:22px;font-size:10px}
+.items-tbl input[type=number]{width:70px;border:1px solid #d8dde6;border-radius:3px;padding:3px 6px;height:22px;font-size:10px}
+.add-item-row{padding:8px 10px;background:#f8f9fa;border-top:1px solid #e4e6ea;display:flex;gap:8px;align-items:center}
+.add-item-row input{flex:1;font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;height:26px}
+
+/* DIV CHECKBOX */
+.div-wrap{display:flex;flex-direction:column;gap:3px;font-size:10px;color:#555}
+.div-wrap-row{display:flex;align-items:center;gap:5px;}
+textarea.obs-ta{width:100%;border:1px solid #d8dde6;border-radius:3px;padding:4px 6px;font-size:9px;font-family:Arial;resize:none;height:38px;margin-top:3px}
+
+/* FORM ACTIONS */
+.form-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;border-top:1px solid #f0f0f0;margin-top:4px}
+
+/* MODAIS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(2px)}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+.mw400{width:440px}.mw560{width:560px}
+.mh{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:11px 18px;color:#fff;font-size:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.mh-x{cursor:pointer;opacity:.75;font-size:16px;background:none;border:none;color:#fff;line-height:1;padding:0}
+.mb{padding:20px}
+.mf{padding:11px 20px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;background:#fafafa}
+.ok-icon{width:52px;height:52px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:10px auto 14px;color:#1b5e20;font-size:24px;font-weight:700}
+
+/* ETIQUETA */
+.etq-preview{border:2px solid #222;padding:10px 12px;display:inline-block;min-width:220px;font-family:monospace;background:#fff;margin-top:10px}
+.etq-bc{font-size:32px;letter-spacing:-3px;display:block;margin:4px 0;color:#111}
+.etq-nr{font-size:15px;font-weight:700;color:#111}
+.etq-info{font-size:10px;color:#555;margin-top:3px}
+
+/* GESTÃO DE TRIAGEM */
+.sug-box{background:#e3f2fd;border-left:2px solid #1976d2;padding:4px 8px;margin-top:4px;font-size:9px;color:#0d47a1;border-radius:0 3px 3px 0}
+
+.footer{text-align:center;font-size:10px;color:#bbb;padding:14px;margin-top:4px}
+tr.div-row td:first-child{border-left:4px solid #c62828;}
+tr.div-row{background:#fff8f8;}
+tr.div-row:hover td{background:#fff0f0;}
+</style>
+</head>
+<body>
+
+
+
+
+
+<div class="main">
+
+  <!-- GERENCIADOR -->
+  <div class="page active" id="page-ger">
+    <div class="bread">Home / <a onclick="nav('ger')">Gerenciador de Devolução</a></div>
+    <div class="page-title">
+      GERENCIADOR DE DEVOLUÇÃO
+      <button class="btn bb" style="margin-left:auto" onclick="nav('nr')">+ Criar NR</button>
+    </div>
+
+    <div class="panel-grid">
+      <div class="pc pc-1 active" id="pc-env" onclick="filtrar('env')">
+        <div class="n" id="cnt-env">5</div>
+        <div class="l">NFs aguardando<br>envio ao cliente</div>
+      </div>
+      <div class="pc pc-2" id="pc-lib" onclick="filtrar('lib')">
+        <div class="n" id="cnt-lib">4</div>
+        <div class="l">NFs aguardando<br>liberação triagem</div>
+      </div>
+      <div class="pc pc-3" id="pc-tri" onclick="filtrar('tri')">
+        <div class="n" id="cnt-tri">2</div>
+        <div class="l">NFs aguardando<br>triagem</div>
+      </div>
+      <div class="pc pc-4" id="pc-div" onclick="filtrar('div')">
+        <div class="n" id="cnt-div">2</div>
+        <div class="l">NFs com itens<br>divergentes</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filters">
+        <select id="f-status" onchange="onFStatus()" style="width:200px">
+          <option value="env">Aguardando envio ao cliente</option>
+          <option value="lib">Aguardando liberação triagem</option>
+          <option value="tri">Aguardando triagem</option>
+          <option value="div">Com itens divergentes</option>
+        </select>
+        <input type="text" placeholder="Nº NR ou NF" style="width:115px"/>
+        <input type="text" placeholder="CNPJ / CPF" style="width:125px"/>
+        <input type="text" placeholder="Código NN" style="width:95px"/>
+        <input type="date" style="width:115px"/>
+        <input type="date" style="width:115px"/>
+        <button class="btn bb">🔍 Filtrar</button>
+        <button class="btn bo">Limpar</button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px">
+        <button class="btn bk" id="btn-csv" style="display:none" onclick="openCSV()">⬇ Gerar CSV</button>
+        <button class="btn bo" id="btn-etq-lote" style="display:none" onclick="openEtiquetaLote()">🖨 Imprimir Etiquetas</button>
+        <button class="btn bb" id="btn-lib" style="display:none" onclick="openLiberar()">▶ Liberar para Triagem</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table>
+      </div>
+    </div>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- CRIAR NR -->
+  <div class="page" id="page-nr">
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn" onclick="_goBack()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('ger')">Gerenciador de Devolução</a> / Criar NR</span></div>
+    <div class="page-title">CRIAR NR — RECEBIMENTO DE DEVOLUÇÃO</div>
+
+    <div class="form-wrap">
+
+      <!-- CHECKBOX INSUCESSO -->
+      <div class="insucesso-bar" onclick="toggleInsucesso()">
+        <input type="checkbox" class="chk-ins" id="chk-ins" onclick="event.stopPropagation();toggleInsucesso()" />
+        <label for="chk-ins">Insucesso de entrega</label>
+        <span class="hint-ins" id="ins-hint">Marque para replicar automaticamente uma nota fiscal de venda existente</span>
+      </div>
+
+      <!-- CABEÇALHO DA NR -->
+      <div class="card" style="padding:16px">
+        <div class="form-sec">
+          <div class="form-sec-title">Identificação da Nota Fiscal</div>
+          <!-- Linha 1: NF + Série + Botão Replicar -->
+          <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:14px">
+            <div class="f-item" style="width:200px">
+              <label class="fl">Número <span class="req">*</span></label>
+              <input type="text" id="f-numero" placeholder="Número da NF" oninput="onNFInput()"/>
+            </div>
+            <div class="f-item" style="width:90px">
+              <label class="fl">Série <span class="req">*</span></label>
+              <input type="text" id="f-serie" placeholder="Série" onblur="validarNF()"/>
+            </div>
+            <div class="f-item" style="width:130px">
+              <label class="fl">Data <span class="req">*</span></label>
+              <input type="date" id="f-data"/>
+            </div>
+            <div class="f-item" style="width:80px">
+              <label class="fl">CFOP</label>
+              <input type="text" id="f-cfop" placeholder="CFOP" class="f-disabled" disabled/>
+            </div>
+            <div class="f-item" style="flex:1">
+              <label class="fl">Chave de Acesso</label>
+              <input type="text" id="f-chave" placeholder="Preenchido automaticamente" class="f-disabled" disabled/>
+            </div>
+            <div style="flex-shrink:0;padding-bottom:1px">
+              <button class="btn bb" id="btn-replicar" disabled onclick="replicarNF()" style="height:28px;white-space:nowrap">Replicar NF de venda</button>
+            </div>
+          </div>
+          <!-- Linha 2: Depositante + Fornecedor + PO + Código Interno -->
+          <div class="g4">
+            <div class="f-item">
+              <label class="fl">Depositante <span class="req">*</span></label>
+              <select id="f-dep">
+                <option value="">Selecione</option>
+                <option>Nespresso</option>
+              </select>
+            </div>
+            <div class="f-item">
+              <label class="fl">Tipo de Recebimento <span class="req">*</span></label>
+              <select id="f-tipo-rec" style="background:#f5f5f5"></select>
+              <div class="hint" id="f-tipo-rec-hint" style="display:none">Único tipo disponível preenchido automaticamente</div>
+            </div>
+            <div class="f-item">
+              <label class="fl">Fornecedor</label>
+              <input type="text" id="f-forn" placeholder="Fornecedor"/>
+            </div>
+            <div class="f-item">
+              <label class="fl">Número PO/Delivery</label>
+              <input type="text" id="f-po" placeholder="Número PO ou Delivery"/>
+            </div>
+            <div class="f-item">
+              <label class="fl">Código Interno Emitente</label>
+              <input type="text" id="f-cod-int" placeholder="Código interno"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-sec" style="margin-top:6px">
+          <div class="form-sec-title">Dados Complementares</div>
+          <div class="g4">
+            <div class="f-item">
+              <label class="fl">CPF / CNPJ do Cliente</label>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="f-cpf" placeholder="CPF ou CNPJ" style="flex:1" oninput="buscaCliente(this.value)"/>
+                <button class="btn bo btn-sm" style="height:28px" onclick="buscaCliente(document.getElementById('f-cpf').value)">Buscar</button>
+              </div>
+              <div class="hint">Preencha para buscar o cliente no cadastro</div>
+            </div>
+            <div class="f-item">
+              <label class="fl">Cliente</label>
+              <input type="text" id="f-cliente" placeholder="Preenchido automaticamente" class="f-disabled" disabled/>
+            </div>
+            <div class="f-item">
+              <label class="fl">Código NN <span class="opt">(opcional)</span></label>
+              <input type="text" id="f-nn" placeholder="Código NN"/>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ITENS -->
+        <div class="form-sec" style="margin-top:6px">
+          <div class="form-sec-title">Itens da Nota Fiscal</div>
+          <div id="info-itens-b2c" class="info-box" style="display:none">Itens replicados automaticamente da nota fiscal de venda. Não podem ser alterados. Use o checkbox de divergência quando necessário.</div>
+          <div id="info-itens-b2b" class="warn-box">Adicione os itens via leitura de código de barras ou digitação manual do código do produto.</div>
+          <div class="items-wrap">
+            <table class="items-tbl">
+              <thead>
+                <tr>
+                  <th>PN</th>
+                  <th>Barra</th>
+                  <th>Descrição</th>
+                  <th>Qtde.</th>
+                  <th>Valor Unit.</th>
+                  <th>Lote</th>
+                  <th>Série</th>
+                  <th>Divergência</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="itens-tbody">
+                <tr id="row-empty"><td colspan="9" style="text-align:center;color:#aaa;padding:16px;font-style:italic">Nenhum item adicionado.</td></tr>
+              </tbody>
+            </table>
+            </div>
+            <div class="add-item-row" id="add-item-row">
+              <input type="text" id="bipe-input" placeholder="Bipe o código de barras ou informe o código do produto e pressione Enter" onkeydown="if(event.key==='Enter')addItem()"/>
+              <button class="btn bb btn-sm" style="height:26px" onclick="addItem()">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn bg" onclick="nav('ger')">Cancelar</button>
+
+          <button class="btn bb" onclick="salvarNR()">Salvar NR</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+</div>
+
+<!-- MODAL FEEDBACK LIBERAÇÃO -->
+<div class="overlay" id="modal-lib-ok">
+  <div class="modal mw400">
+    <div class="mh">Liberação para Triagem</div>
+    <div class="mb" style="text-align:center;padding:22px 20px">
+      <div class="ok-icon">✓</div>
+      <p style="font-size:11px;color:#444;line-height:1.8" id="lib-ok-msg">As NFs selecionadas foram liberadas para triagem com sucesso.</p>
+    </div>
+    <div class="mf" style="justify-content:center">
+      <button class="btn bb" onclick="closeM('modal-lib-ok')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CANCELAR LIB -->
+<div class="overlay" id="modal-cancel-lib">
+  <div class="modal mw400">
+    <div class="mh">Confirmação</div>
+    <div class="mb" style="text-align:center;padding:22px 20px">
+      <p style="font-size:11px;color:#444;line-height:1.8">A liberação para triagem da NF da NR selecionada será cancelada.<br>Confirma essa ação?</p>
+    </div>
+    <div class="mf" style="justify-content:center;gap:14px">
+      <button class="btn bg" onclick="closeM('modal-cancel-lib')">Não</button>
+      <button class="btn bb" onclick="confirmarCancelLib()">Sim</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CSV -->
+<div class="overlay" id="modal-csv">
+  <div class="modal mw400">
+    <div class="mh">Gerar CSV</div>
+    <div class="mb" style="text-align:center;padding:22px 20px">
+      <p style="font-size:11px;color:#444;line-height:1.8">O arquivo CSV com as NRs selecionadas será gerado para envio ao cliente.<br><br>Após o envio, as NRs ficarão com status <strong>Aguardando liberação triagem</strong>.<br><br>Confirma?</p>
+    </div>
+    <div class="mf" style="justify-content:center;gap:14px">
+      <button class="btn bg" onclick="closeM('modal-csv')">Não</button>
+      <button class="btn bk" onclick="confirmarCSV()">Sim, gerar CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NF NÃO LOCALIZADA -->
+<div class="overlay" id="modal-nf-nok">
+  <div class="modal mw400">
+    <div class="mh">Atenção <button class="mh-x" onclick="fecharModalNF('modal-nf-nok')">✕</button></div>
+    <div class="mb" style="text-align:center;padding:20px">
+      <p style="font-size:11px;color:#444" id="modal-nf-msg">NF / série informada não foi localizada.</p>
+    </div>
+    <div class="mf" style="justify-content:center">
+      <button class="btn bb" onclick="fecharModalNF('modal-nf-nok')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ETIQUETA -->
+<div class="overlay" id="modal-etq">
+  <div class="modal mw560">
+    <div class="mh">Confirmar Impressão de Etiquetas <button class="mh-x" onclick="closeM('modal-etq')">✕</button></div>
+    <div class="mb" style="padding:16px">
+      <p style="font-size:10px;color:#555;margin-bottom:12px">As etiquetas abaixo serão enviadas para impressão. A quantidade corresponde ao número de volumes de cada NR.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:10px">
+        <thead>
+          <tr>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">N. NR</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">N. NF</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Cliente</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:center;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Qtd. Etiquetas</th>
+          </tr>
+        </thead>
+        <tbody id="etq-tbody"></tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px 12px;background:#e8f0fe;border-radius:4px;font-size:10px;color:#1565c0">
+        Total: <strong id="etq-total">0</strong> etiqueta(s) serão impressas.
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bg" onclick="closeM('modal-etq')">Cancelar</button>
+      <button class="btn bb" onclick="confirmarImpressao()">🖨 Confirmar Impressão</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTÓRICO ETIQUETA -->
+<div class="overlay" id="modal-historico">
+  <div class="modal mw560">
+    <div class="mh">Histórico de Etiquetas <button class="mh-x" onclick="closeM('modal-historico')">✕</button></div>
+    <div class="mb" style="padding:16px">
+      <div style="margin-bottom:12px;font-size:10px;color:#555" id="hist-nr-info"></div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px">
+        <thead>
+          <tr>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Tipo</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Data</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Hora</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Usuário</th>
+            <th style="background:#f8f9fa;padding:7px 10px;text-align:center;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea">Qtd. Etiquetas</th>
+          </tr>
+        </thead>
+        <tbody id="hist-tbody"></tbody>
+      </table>
+      <div id="hist-vazio" style="text-align:center;color:#aaa;padding:20px;font-style:italic;font-size:10px;display:none">Nenhuma etiqueta impressa para esta NR.</div>
+    </div>
+    <div class="mf">
+      <button class="btn bg" onclick="closeM('modal-historico')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="overlay" id="modal-liberar">
+  <div class="modal">
+    <div class="mh">Liberar para Triagem <span onclick="closeModal('modal-liberar')" style="cursor:pointer;opacity:.7">✕</span></div>
+    <div class="mb">
+      <div style="margin-bottom:12px">
+        <label>Data de Autorização <span style="color:red">*</span></label>
+        <input type="date" id="lib-data" oninput="checkLiberarBtn()"/>
+        <div class="hint">Data que o cliente autorizou a devolução</div>
+      </div>
+      <div><label>Observação</label><textarea id="lib-obs"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn bg" onclick="cancelarLiberar()">Cancelar</button>
+      <button class="btn bb" id="lib-confirmar-btn" onclick="abrirConfirmarModal()" disabled>Confirmar</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL SUCESSO -->
+<div class="overlay" id="modal-ok">
+  <div class="modal mw400">
+    <div class="mh">Sucesso</div>
+    <div class="mb" style="text-align:center;padding:20px">
+      <div class="ok-icon">✓</div>
+      <p style="font-size:11px;color:#444" id="ok-msg"></p>
+    </div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-ok')">OK</button></div>
+  </div>
+</div>
+
+
+
+<script>
+var statusAtivo='env', selected=[], cancelLibId=null, insucessoOn=false, replicado=false, itemCount=0, etqVolOriginal=1, etqPendingVal=null;
+
+// Tipos de recebimento que exigem triagem
+var tiposRecebimento=[
+  {id:1, desc:'Recebimento – Devolução com Triagem'},
+  {id:2, desc:'Recebimento – Insucesso de Entrega'},
+  {id:3, desc:'Recebimento – Devolução B2B com Triagem'},
+];
+
+var nrs=[
+  {id:1,data:'28/05/2026',nr:'NR-00412',nf:'98231/1',cliente:'João Silva',cnpj:'123.456.789-00',nn:'NN-001',pedido:'PED-001',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:2,insucesso:true,etqHist:[]},
+  {id:2,data:'27/05/2026',nr:'NR-00411',nf:'97115/1',cliente:'Maria Santos',cnpj:'987.654.321-00',nn:'',pedido:'PED-002',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,divObs:'Quantidade recebida divergente da nota fiscal.',vol:1,insucesso:true,etqHist:[]},
+  {id:3,data:'26/05/2026',nr:'NR-00410',nf:'45680/1',cliente:'Empresa ABC Ltda',cnpj:'12.345.678/0001-99',nn:'NN-003',pedido:'',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:3,insucesso:false,etqHist:[]},
+  {id:4,data:'25/05/2026',nr:'NR-00409',nf:'45679/2',cliente:'Carlos Oliveira',cnpj:'111.222.333-44',nn:'',pedido:'PED-004',status:'env',csv:false,csvInfo:'',libInfo:'',div:false,vol:1,insucesso:true,etqHist:[]},
+  {id:5,data:'24/05/2026',nr:'NR-00408',nf:'45678/1',cliente:'Empresa XYZ SA',cnpj:'98.765.432/0001-10',nn:'NN-005',pedido:'',status:'env',csv:false,csvInfo:'',libInfo:'',div:true,divObs:'Quantidade recebida divergente da nota fiscal.',vol:2,insucesso:false,etqHist:[]},
+  {id:6,data:'23/05/2026',nr:'NR-00407',nf:'45677/1',cliente:'Ana Costa',cnpj:'555.666.777-88',nn:'',pedido:'PED-006',status:'lib',csv:true,csvInfo:'23/05 09:14 – Alessandro',libInfo:'',div:false,vol:1,insucesso:true,etqHist:[]},
+  {id:7,data:'22/05/2026',nr:'NR-00406',nf:'45676/1',cliente:'Pedro Lima',cnpj:'444.555.666-77',nn:'NN-007',pedido:'PED-007',status:'lib',csv:true,csvInfo:'22/05 10:22 – Alessandro',libInfo:'',div:false,vol:2,insucesso:true,etqHist:[]},
+  {id:8,data:'21/05/2026',nr:'NR-00405',nf:'45675/2',cliente:'Empresa MNO',cnpj:'11.222.333/0001-44',nn:'',pedido:'',status:'lib',csv:true,csvInfo:'21/05 14:00 – Alessandro',libInfo:'',div:false,vol:4,insucesso:false,etqHist:[]},
+  {id:9,data:'20/05/2026',nr:'NR-00404',nf:'45674/1',cliente:'Fernanda Alves',cnpj:'333.444.555-66',nn:'',pedido:'PED-009',status:'lib',csv:true,csvInfo:'20/05 08:30 – Alessandro',libInfo:'',div:false,vol:1,insucesso:true,etqHist:[]},
+  {id:10,data:'19/05/2026',nr:'NR-00403',nf:'45673/1',cliente:'Roberto Souza',cnpj:'222.333.444-55',nn:'NN-010',pedido:'PED-010',status:'tri',csv:true,csvInfo:'19/05 11:00 – Alessandro',libInfo:'19/05 15:00 – Alessandro',div:false,vol:1,insucesso:true,etqHist:[]},
+  {id:11,data:'18/05/2026',nr:'NR-00402',nf:'45672/1',cliente:'Empresa PQR',cnpj:'55.666.777/0001-88',nn:'NN-011',pedido:'',status:'tri',csv:true,csvInfo:'18/05 09:00 – Alessandro',libInfo:'18/05 14:00 – Alessandro',div:false,vol:3,insucesso:false,etqHist:[]},
+];
+
+var prodsCatalog=[
+  {cod:'PROD-001',barra:'7891234560010',desc:'Café Intenso 250g',valor:'12.90',serie:false},
+  {cod:'PROD-002',barra:'7891234560027',desc:'Cápsula Vanille 10un',valor:'28.50',serie:false},
+  {cod:'PROD-003',barra:'7891234560034',desc:'Sleeve Virtuo',valor:'8.90',serie:false},
+  {cod:'PROD-004',barra:'7891234560041',desc:'Máquina Inissia Branca',valor:'349.00',serie:true},
+  {cod:'PROD-005',barra:'7891234560058',desc:'Cápsula Decaffeinato',valor:'24.90',serie:false},
+];
+
+function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function today(){return new Date().toLocaleDateString('pt-BR');}
+function todayISO(){var d=new Date();return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))+'-'+String(d.getDate()).padStart(2,'0');}
+
+// NAVEGAÇÃO
+var _navHist=[];
+function nav(p){
+  var cur=document.querySelector('.page.active');
+  if(cur&&cur.id!=='page-'+p)_navHist.push(cur.id.replace('page-',''));
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.sb-btn[id^="sb-"]').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('page-'+p).classList.add('active');
+  var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
+  if(p==='ger'){renderTable();updateCounters();}
+  if(p==='nr')resetNR();
+  _updateBackBtn();
+}
+function _goBack(){
+  if(_navHist.length===0)return;
+  var prev=_navHist.pop();
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('page-'+prev).classList.add('active');
+  if(prev==='ger'){renderTable();updateCounters();}
+  _updateBackBtn();
+}
+function _updateBackBtn(){
+  document.querySelectorAll('.back-btn').forEach(function(b){
+    b.style.display=_navHist.length>0?'inline-flex':'none';
+  });
+}
+
+// GERENCIADOR
+function filtrar(s){
+  statusAtivo=s;selected=[];
+  document.getElementById('f-status').value=s;
+  document.querySelectorAll('.pc').forEach(function(c){c.classList.remove('active')});
+  var map={env:'pc-env',lib:'pc-lib',tri:'pc-tri',div:'pc-div'};
+  document.getElementById(map[s]).classList.add('active');
+  renderTable();
+}
+function onFStatus(){filtrar(document.getElementById('f-status').value);}
+
+
+function getBadge(d){
+  var map={env:'<span class="badge b-blue">Aguard. envio cliente</span>',lib:'<span class="badge b-red">Aguard. liberação triagem</span>',tri:'<span class="badge b-green">Aguardando triagem</span>'};
+  return map[d.status]||d.status;
+}
+
+function renderTable(){
+  var filtered=statusAtivo==='div'?nrs.filter(function(d){return d.div}):nrs.filter(function(d){return d.status===statusAtivo});
+  var thead=document.getElementById('thead');
+  var tbody=document.getElementById('tbody');
+  var btnCSV=document.getElementById('btn-csv');
+  var btnLib=document.getElementById('btn-lib');
+  if(!thead||!tbody) return;
+
+  btnCSV.style.display=statusAtivo==='env'?'inline-flex':'none';
+  var temSel=selected.length>0&&selected.some(function(id){var d=nrs.find(function(x){return x.id===id});return d&&d.csv;});
+  btnLib.style.display=(statusAtivo==='lib'&&temSel)?'inline-flex':'none';
+  if(btnLib.style.display!=='none')btnLib.textContent='▶ Liberar para Triagem ('+selected.length+')';
+  var btnEtqLote=document.getElementById('btn-etq-lote');
+  btnEtqLote.style.display=selected.length>0?'inline-flex':'none';
+  if(selected.length>0)btnEtqLote.textContent='🖨 Imprimir Etiquetas ('+selected.length+')';
+
+  var cols='<th><input type="checkbox" id="chk-all" onchange="selAll(this.checked)"/></th><th>Data</th><th>N. NR</th><th>N. NF</th><th>Cliente</th><th>CPF/CNPJ</th><th>Cód. NN</th><th>Pedido</th><th>Status</th><th>Ações</th>';
+  if(statusAtivo==='env')cols+='<th>CSV</th>';
+  else if(statusAtivo==='lib')cols+='<th>CSV gerado por</th><th>Cancelar</th>';
+  else if(statusAtivo==='tri')cols+='<th>Liberado por</th>';
+  thead.innerHTML=cols;
+
+  tbody.innerHTML=filtered.map(function(d){
+    var chk='<input type="checkbox" onchange="toggleSel('+d.id+',this.checked)" '+(selected.includes(d.id)?'checked':'')+'/>';
+    var divObs=d.divObs?d.divObs:'';
+  var nfCell=(d.div?'<span style="color:#c62828;font-size:14px;font-weight:700;margin-right:4px;vertical-align:middle" title="'+divObs+'">⚠</span>':'')+d.nf+(d.div&&divObs?'<div style="font-size:9px;color:#c62828;margin-top:2px">'+divObs+'</div>':'');
+    var extra='';
+    if(statusAtivo==='env'){
+      var csvB=d.csv?'<span class="badge b-teal">✓ '+d.csvInfo+'</span>':'<span style="color:#aaa;font-size:9px">Não gerado</span>';
+      extra='<td>'+csvB+'</td>';
+    }else if(statusAtivo==='lib'){
+      extra='<td style="font-size:9px;color:#555">'+d.csvInfo+'</td><td><button class="btn br btn-sm" onclick="openCancelLib('+d.id+')">✕ Cancelar</button></td>';
+    }else if(statusAtivo==='tri'){
+      extra='<td style="font-size:9px;color:#555">'+d.libInfo+'</td>';
+    }
+    var etqImpresso=d.etqHist&&d.etqHist.length>0;
+    var btnImpr='<button class="btn btn-sm" style="'+(etqImpresso?'background:#1b5e20;color:#fff':'background:#fff;color:#0057b8;border:1px solid #0057b8')+'" onclick="openEtiquetaSingle('+d.id+')" title="'+(etqImpresso?'Reimprimir etiqueta de volume':'Imprimir etiqueta de volume')+'">🖨</button>';
+    var btnHist='<button class="btn bo btn-sm" onclick="openHistorico('+d.id+')" title="Histórico de impressão" style="margin-left:4px">📋</button>';
+    var acaoCell='<td style="white-space:nowrap">'+btnImpr+btnHist+'</td>';
+    return'<tr'+(d.div?' class="div-row"':'')+' ><td>'+chk+'</td><td>'+d.data+'</td><td><a class="lnk">'+d.nr+'</a></td><td>'+nfCell+'</td><td>'+d.cliente+'</td><td>'+d.cnpj+'</td><td>'+(d.nn||'—')+'</td><td>'+(d.pedido||'—')+'</td><td>'+getBadge(d)+'</td>'+acaoCell+extra+'</tr>';
+  }).join('');
+  if(!filtered.length)tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum registro para este status.</td></tr>';
+}
+
+function toggleSel(id,c){
+  if(c){if(!selected.includes(id))selected.push(id);}
+  else{selected=selected.filter(function(x){return x!==id});}
+  renderTable();
+  var f=statusAtivo==='div'?nrs.filter(function(d){return d.div}):nrs.filter(function(d){return d.status===statusAtivo});
+  var chkAll=document.getElementById('chk-all');
+  if(chkAll)chkAll.checked=selected.length>0&&f.every(function(d){return selected.includes(d.id);});
+}
+function selAll(c){
+  var f=statusAtivo==='div'?nrs.filter(function(d){return d.div}):nrs.filter(function(d){return d.status===statusAtivo});
+  selected=c?f.map(function(d){return d.id}):[];
+  renderTable();
+  var chkAll=document.getElementById('chk-all');
+  if(chkAll)chkAll.checked=c;
+}
+
+// CSV
+function openCSV(){document.getElementById('modal-csv').classList.add('show');}
+function confirmarCSV(){
+  var targets=selected.length>0?nrs.filter(function(d){return selected.includes(d.id)&&d.status==='env'}):nrs.filter(function(d){return d.status==='env'});
+  targets.forEach(function(d){d.csv=true;d.csvInfo=today()+' '+now()+' – Alessandro';d.status='lib';});
+  selected=[];closeM('modal-csv');updateCounters();
+  showOK('CSV gerado com sucesso! NRs movidas para "Aguardando liberação triagem".');
+  setTimeout(function(){closeM('modal-ok');filtrar('lib');},1600);
+}
+
+// LIBERAR
+function openLiberar(){
+  var targets=selected.length>0?nrs.filter(function(d){return selected.includes(d.id)&&d.status==='lib'}):nrs.filter(function(d){return d.status==='lib'});
+  targets.forEach(function(d){d.status='tri';d.libInfo=today()+' '+now()+' – Alessandro';});
+  var count=targets.length;
+  selected=[];updateCounters();
+  var libMsg=document.getElementById('lib-ok-msg');
+  if(libMsg) libMsg.textContent=count+' NF'+(count>1?'s foram liberadas':' foi liberada')+' para triagem com sucesso.';
+  var libModal=document.getElementById('modal-lib-ok');
+  if(libModal) libModal.classList.add('show');
+  renderTable();
+}
+function openCancelLib(id){cancelLibId=id;document.getElementById('modal-cancel-lib').classList.add('show');}
+function confirmarCancelLib(){if(cancelLibId){var d=nrs.find(function(x){return x.id===cancelLibId});if(d){d.status='lib';d.libInfo='';}}cancelLibId=null;closeM('modal-cancel-lib');updateCounters();renderTable();}
+
+// FORM NR
+function initTipoRecebimento(){
+  var sel=document.getElementById('f-tipo-rec');
+  var hint=document.getElementById('f-tipo-rec-hint');
+  if(!sel) return;
+  sel.innerHTML='';
+  if(tiposRecebimento.length===1){
+    var opt=document.createElement('option');
+    opt.value=tiposRecebimento[0].id;
+    opt.textContent=tiposRecebimento[0].desc;
+    sel.appendChild(opt);
+    sel.disabled=true;
+    sel.style.background='#f5f5f5';
+    sel.style.color='#666';
+    hint.style.display='block';
+  }else{
+    sel.disabled=false;
+    sel.style.background='#fff';
+    sel.style.color='#333';
+    hint.style.display='none';
+    var optDefault=document.createElement('option');
+    optDefault.value='';optDefault.textContent='Selecione um tipo de recebimento';
+    sel.appendChild(optDefault);
+    tiposRecebimento.forEach(function(t){
+      var opt=document.createElement('option');
+      opt.value=t.id;opt.textContent=t.desc;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function resetNR(){
+  insucessoOn=false;replicado=false;itemCount=0;
+  var chkIns=document.getElementById('chk-ins');if(!chkIns)return;
+  chkIns.checked=false;
+  initTipoRecebimento();
+  var insHint=document.getElementById('ins-hint');
+  if(insHint){insHint.textContent='Marque para replicar automaticamente uma nota fiscal de venda existente';insHint.style.color='#5c7fb8';}
+  setFieldsInsucesso(false);
+  limparForm();
+  var fdata=document.getElementById('f-data');if(fdata)fdata.value=todayISO();
+}
+
+function limparForm(){
+  ['f-numero','f-serie','f-chave','f-cfop','f-forn','f-po','f-cod-int','f-cpf','f-nn'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('f-cliente').value='';
+  document.getElementById('f-dep').value='';
+
+  document.getElementById('btn-replicar').disabled=true;
+  document.getElementById('itens-tbody').innerHTML='<tr id="row-empty"><td colspan="9" style="text-align:center;color:#aaa;padding:16px;font-style:italic">Nenhum item adicionado.</td></tr>';
+  replicado=false;
+}
+
+function toggleInsucesso(){
+  var nfVal=document.getElementById('f-numero').value.trim();
+  var serieVal=document.getElementById('f-serie').value.trim();
+  if(!insucessoOn && (nfVal||serieVal)){
+    document.getElementById('ins-hint').textContent='Para selecionar a opção de insucesso de entrega, é necessário limpar os campos de Nota Fiscal e Série.';
+    document.getElementById('ins-hint').style.color='#c62828';
+    document.getElementById('chk-ins').checked=false;
+    return;
+  }
+  insucessoOn=!insucessoOn;
+  document.getElementById('chk-ins').checked=insucessoOn;
+  var ih=document.getElementById('ins-hint');
+  if(ih){ih.textContent=insucessoOn?'Informe o número e série da NF de venda e clique em Replicar':'Marque para replicar automaticamente uma nota fiscal de venda existente';ih.style.color=insucessoOn?'#1565c0':'#5c7fb8';}
+  setFieldsInsucesso(insucessoOn);
+  if(!insucessoOn){limparForm();}
+}
+
+function setFieldsInsucesso(on){
+  var btnRep=document.getElementById('btn-replicar');
+  btnRep.style.display=on?'inline-flex':'none';
+  document.getElementById('info-itens-b2c').style.display='none';
+  document.getElementById('info-itens-b2b').style.display=on?'none':'block';
+  document.getElementById('add-item-row').style.display=on&&!replicado?'none':'flex';
+  // campos liberados/bloqueados
+  var lockFields=['f-chave','f-cfop','f-forn'];
+  lockFields.forEach(function(id){
+    var el=document.getElementById(id);
+    if(on){el.classList.add('f-disabled');el.disabled=true;}
+    else{el.classList.remove('f-disabled');el.disabled=false;}
+  });
+}
+
+function onNFInput(){
+  if(!insucessoOn)return;
+  document.getElementById('btn-replicar').disabled=true;
+}
+
+function validarNF(){
+  if(!insucessoOn)return;
+  var nf=document.getElementById('f-numero').value.trim();
+  var serie=document.getElementById('f-serie').value.trim();
+  if(!nf||!serie)return;
+  // simular validação: NF "99999" = já tem devolução, NF "00000" = não localizada
+  if(nf==='00000'){
+    document.getElementById('modal-nf-msg').textContent='NF / série informada não foi localizada.';
+    document.getElementById('modal-nf-nok').classList.add('show');
+  }else if(nf==='99999'){
+    document.getElementById('modal-nf-msg').textContent='Nota Fiscal/Série já possui registro de devolução.';
+    document.getElementById('modal-nf-nok').classList.add('show');
+  }else{
+    document.getElementById('btn-replicar').disabled=false;
+  }
+}
+
+function fecharModalNF(id){
+  closeM(id);
+  document.getElementById('f-numero').value='';
+  document.getElementById('f-serie').value='';
+  document.getElementById('btn-replicar').disabled=true;
+  setTimeout(function(){document.getElementById('f-numero').focus();},50);
+}
+
+function replicarNF(){
+  var nf=document.getElementById('f-numero').value.trim();
+  document.getElementById('f-chave').value='35260426065798000182550010000'+nf.padStart(9,'0')+'1';
+  document.getElementById('f-cfop').value='1.202';
+  document.getElementById('f-dep').value='Nespresso';
+  document.getElementById('f-forn').value='Nespresso';
+  document.getElementById('f-cpf').value='12.345.678/0001-90';
+  document.getElementById('f-cliente').value='Nespresso Brasil Ltda';
+  etqVolOriginal=1;
+  replicado=true;
+  document.getElementById('info-itens-b2c').style.display='block';
+  document.getElementById('info-itens-b2b').style.display='none';
+  document.getElementById('add-item-row').style.display='none';
+  var itens=[
+    {pn:'PROD-001',barra:'7891234560010',desc:'Café Intenso 250g',qtd:10,valor:'12.90',lote:'L001'},
+    {pn:'PROD-002',barra:'7891234560027',desc:'Cápsula Vanille',qtd:5,valor:'28.50',lote:'L002'},
+    {pn:'PROD-003',barra:'7891234560034',desc:'Sleeve Virtuo',qtd:3,valor:'8.90',lote:''},
+  ];
+  document.getElementById('itens-tbody').innerHTML=itens.map(function(it,i){
+    return'<tr><td>'+it.pn+'</td><td>'+it.barra+'</td><td>'+it.desc+'</td><td>'+it.qtd+'</td><td>R$ '+it.valor+'</td><td>'+(it.lote||'<span style="color:#aaa">—</span>')+'</td><td><span style="color:#aaa;font-size:9px">—</span></td><td><div class="div-wrap"><input type="checkbox" onchange="toggleDivB2C('+i+',this.checked,\'obs-b2c-'+i+'\')" /> Marcar divergência</div><textarea id="obs-b2c-'+i+'" class="obs-ta" placeholder="Descreva a divergência" style="display:none"></textarea></td><td><span style="color:#aaa;font-size:9px">—</span></td></tr>';
+  }).join('');
+}
+
+function toggleDivB2C(i,c,obsId){document.getElementById(obsId).style.display=c?'block':'none';}
+
+function buscaCliente(v){
+  var el=document.getElementById('f-cliente');
+  if(v.replace(/\D/g,'').length>=11)el.value='Empresa ABC Ltda / João Silva';
+  else el.value='';
+}
+
+function addItem(){
+  var inp=document.getElementById('bipe-input');
+  var cod=inp.value.trim();
+  if(!cod)return;
+  var prod=prodsCatalog.find(function(p){return p.cod===cod||p.barra===cod||p.desc.toLowerCase().includes(cod.toLowerCase())});
+  if(!prod)prod={cod:cod,barra:cod,desc:'Produto '+cod,valor:'0.00',serie:false};
+  var empty=document.getElementById('row-empty');if(empty)empty.remove();
+  itemCount++;
+  var tr=document.createElement('tr');
+
+  // PN
+  var td1=document.createElement('td');td1.textContent=prod.cod;tr.appendChild(td1);
+  // Barra
+  var td2=document.createElement('td');td2.textContent=prod.barra;tr.appendChild(td2);
+  // Desc
+  var td3=document.createElement('td');td3.textContent=prod.desc;tr.appendChild(td3);
+  // Qtd
+  var td4=document.createElement('td');
+  var inpQ=document.createElement('input');
+  inpQ.type='number';inpQ.min='1';inpQ.style.width='60px';
+  if(prod.serie){inpQ.value='1';inpQ.max='1';inpQ.disabled=true;inpQ.style.background='#f5f5f5';}
+  else{inpQ.placeholder='Qtde';}
+  td4.appendChild(inpQ);tr.appendChild(td4);
+  // Valor
+  var td5=document.createElement('td');td5.textContent='R$ '+prod.valor;tr.appendChild(td5);
+  // Lote
+  var td6=document.createElement('td');
+  var inpL=document.createElement('input');inpL.type='text';inpL.placeholder='Lote';inpL.style.width='80px';
+  td6.appendChild(inpL);tr.appendChild(td6);
+  // Série
+  var td7=document.createElement('td');
+  if(prod.serie){
+    var inpS=document.createElement('input');inpS.type='text';inpS.placeholder='Nº série obrigatório';inpS.style.width='130px';inpS.style.borderColor='#f9a825';
+    td7.appendChild(inpS);
+  }else{
+    td7.innerHTML='<span style="color:#aaa;font-size:9px">—</span>';
+  }
+  tr.appendChild(td7);
+  // Divergência
+  var td8=document.createElement('td');
+  var chkD=document.createElement('input');chkD.type='checkbox';
+  var lbl=document.createElement('label');lbl.style.fontSize='10px';lbl.style.marginLeft='4px';lbl.textContent='Divergência';
+  var ta=document.createElement('textarea');ta.className='obs-ta';ta.placeholder='Descreva a divergência';ta.style.display='none';
+  chkD.addEventListener('change',function(){ta.style.display=this.checked?'block':'none';});
+  td8.appendChild(chkD);td8.appendChild(lbl);td8.appendChild(document.createElement('br'));td8.appendChild(ta);
+  tr.appendChild(td8);
+  // Remover
+  var td9=document.createElement('td');
+  var btnR=document.createElement('button');btnR.className='btn br btn-sm';btnR.textContent='✕';
+  btnR.addEventListener('click',function(){tr.remove();});
+  td9.appendChild(btnR);tr.appendChild(td9);
+
+  document.getElementById('itens-tbody').appendChild(tr);
+  inp.value='';inp.focus();
+}
+function toggleDivB2B(chk,obsId){document.getElementById(obsId).style.display=chk.checked?'block':'none';}
+
+function salvarNR(){
+  var nf=document.getElementById('f-numero').value.trim();
+  if(!nf){showAlerta('Informe o número da nota fiscal.');return;}
+  if(tiposRecebimento.length>1&&!document.getElementById('f-tipo-rec').value){showAlerta('Selecione um tipo de recebimento.');return;}
+  var novo={
+    id:nrs.length+1,data:today(),
+    nr:'NR-00'+(413+nrs.length),
+    nf:nf+'/'+(document.getElementById('f-serie').value||'1'),
+    cliente:document.getElementById('f-cliente').value||'Cliente',
+    cnpj:document.getElementById('f-cpf').value||'—',
+    nn:document.getElementById('f-nn').value||'',
+    pedido:document.getElementById('f-po').value||'',
+    status:'env',csv:false,csvInfo:'',libInfo:'',div:(function(){var rows=document.getElementById('itens-tbody').rows;for(var i=0;i<rows.length;i++){var chks=rows[i].querySelectorAll('input[type=checkbox]');for(var j=0;j<chks.length;j++){if(chks[j].checked)return true;}}return false;})(),
+    vol:1,
+    insucesso:insucessoOn
+  };
+  nrs.unshift(novo);updateCounters();
+  showOK('NR '+novo.nr+' criada com sucesso!');
+  setTimeout(function(){closeM('modal-ok');nav('ger');filtrar('env');},1600);
+}
+
+// ETIQUETA
+function buildEtqModal(ids){
+  etqIdsParaImprimir=ids;
+  var targets=ids.map(function(id){return nrs.find(function(x){return x.id===id;});}).filter(Boolean);
+  var total=0;
+  var rows=targets.map(function(d){
+    var qtd=d.vol||1;total+=qtd;
+    var jaImpresso=d.etqHist&&d.etqHist.length>0?'<span style="color:#1b5e20;font-size:9px"> (já impressa)</span>':'';
+    return'<tr><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+d.nr+jaImpresso+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+d.nf+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+d.cliente+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0;text-align:center"><strong>'+qtd+'</strong></td></tr>';
+  }).join('');
+  var etqT=document.getElementById('etq-tbody'); if(etqT) etqT.innerHTML=rows;
+  var etqTot=document.getElementById('etq-total'); if(etqTot) etqTot.textContent=total;
+  document.getElementById('modal-etq').classList.add('show');
+}
+function openEtiquetaSingle(id){buildEtqModal([id]);}
+function openHistorico(id){
+  var d=nrs.find(function(x){return x.id===id;});
+  if(!d)return;
+  document.getElementById('hist-nr-info').innerHTML='<strong>'+d.nr+'</strong> &nbsp;|&nbsp; NF: '+d.nf+' &nbsp;|&nbsp; Cliente: '+d.cliente;
+  var hist=d.etqHist||[];
+  var vazio=document.getElementById('hist-vazio');
+  var tbody=document.getElementById('hist-tbody');
+  if(hist.length===0){
+    tbody.innerHTML='';vazio.style.display='block';
+  }else{
+    vazio.style.display='none';
+    tbody.innerHTML=hist.map(function(h){
+      var tipoBadge=h.tipo==='Impressão'?'<span class="badge b-blue">'+h.tipo+'</span>':'<span class="badge b-orange">'+h.tipo+'</span>';
+      return'<tr><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+tipoBadge+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+h.data+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+h.hora+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0">'+h.usuario+'</td><td style="padding:7px 10px;border-bottom:1px solid #f0f0f0;text-align:center">'+h.qtd+'</td></tr>';
+    }).join('');
+  }
+  document.getElementById('modal-historico').classList.add('show');
+}
+function openEtiquetaLote(){
+  if(selected.length===0){showAlerta('Selecione ao menos uma NR para imprimir etiquetas.');return;}
+  buildEtqModal(selected);
+}
+function confirmarImpressao(){
+  var agora=new Date();
+  var dataStr=agora.toLocaleDateString('pt-BR');
+  var horaStr=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  var tipo=etqIdsParaImprimir.length===1&&nrs.find(function(x){return x.id===etqIdsParaImprimir[0];})&&nrs.find(function(x){return x.id===etqIdsParaImprimir[0];}).etqHist.length>0?'Reimpressão':'Impressão';
+  etqIdsParaImprimir.forEach(function(id){
+    var d=nrs.find(function(x){return x.id===id;});
+    if(d){
+      if(!d.etqHist)d.etqHist=[];
+      var t=d.etqHist.length>0?'Reimpressão':'Impressão';
+      d.etqHist.push({tipo:t,data:dataStr,hora:horaStr,usuario:'Alessandro Silveira',qtd:d.vol||1});
+    }
+  });
+  etqIdsParaImprimir=[];
+  closeM('modal-etq');
+  renderTable();
+  showOK('Etiquetas enviadas para impressão com sucesso!');
+}
+var etqIdsParaImprimir=[];
+
+
+function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function showAlerta(msg){var el=document.getElementById('alerta-msg-ger');if(el)el.textContent=msg;document.getElementById('modal-alerta-ger').classList.add('show');}
+</script>
+
+<!-- MODAL ALERTA GENERICO -->
+<div class="overlay" id="modal-alerta-ger">
+  <div class="modal" style="width:400px">
+    <div class="mh">Atenção</div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg-ger"></p></div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-alerta-ger')">OK</button></div>
+  </div>
+</div>
+</body>
+</html>
+</template>
+<template id="tpl-rem">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wiser Log — Remanejamento Devolução</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;font-size:13px;background:#f0f2f5;max-width:480px;margin:0 auto;min-height:100vh}
+
+/* HEADER */
+
+
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:2px 4px;border-radius:2px}
+
+
+
+
+/* STEP BAR */
+.stepbar{background:#fff;border-bottom:1px solid #e4e6ea;padding:10px 16px;display:flex;align-items:center;position:sticky;top:54px;z-index:99}
+.step{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#ccc;background:#fff;transition:all .2s}
+.step-lbl{font-size:8px;color:#aaa;text-align:center;line-height:1.3;transition:color .2s}
+.step.active .step-dot{border-color:#0057b8;color:#0057b8;box-shadow:0 0 0 3px rgba(0,87,184,.12)}
+.step.active .step-lbl{color:#0057b8;font-weight:700}
+.step.done .step-dot{border-color:#1b5e20;background:#1b5e20;color:#fff}
+.step.done .step-lbl{color:#1b5e20}
+.step-line{flex:1;height:2px;background:#e4e6ea;margin-bottom:16px;transition:background .2s}
+.step.done+.step-line,.done-line{background:#1b5e20}
+
+/* MAIN */
+.main{padding:16px;padding-bottom:24px}
+
+/* SCREEN */
+.screen{display:none}.screen.active{display:block}
+
+/* BANNER TAREFA ÚNICA */
+.banner{background:linear-gradient(135deg,#e8f0fe,#f0f7ff);border:1.5px solid #b8d0f0;border-radius:10px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.banner-icon{width:42px;height:42px;border-radius:10px;background:#0057b8;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:#fff}
+.banner-text{}
+.banner-title{font-size:13px;font-weight:700;color:#0057b8;margin-bottom:3px}
+.banner-sub{font-size:11px;color:#5c7fb8;line-height:1.4}
+
+/* BIPE PRINCIPAL — destaque no topo */
+.bipe-principal{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,87,184,.12);padding:16px;margin-bottom:14px;border:1.5px solid #b8d0f0}
+.bipe-principal .bipe-label{font-size:12px;font-weight:700;color:#333;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.bipe-principal .bipe-label span{font-size:18px}
+.bipe-principal input{width:100%;border:2px solid #b8d0f0;border-radius:8px;padding:0 14px;font-size:15px;height:52px;font-family:Arial;transition:border .15s;background:#f8fbff;color:#333;font-weight:600}
+.bipe-principal input:focus{outline:none;border-color:#0057b8;background:#fff;box-shadow:0 0 0 3px rgba(0,87,184,.08)}
+.bipe-sticky{position:sticky;top:108px;z-index:90;margin-bottom:14px}
+.bipe-principal .bipe-hint{font-size:10px;color:#888;margin-top:5px;text-align:center}
+
+/* CARD */
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:16px;margin-bottom:12px;border:1px solid #f0f0f0}
+.card-title{font-size:11px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+
+/* COUNTERS */
+.counters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.counter{border-radius:10px;padding:14px 12px;text-align:center}
+.c-ok{background:#e8f5e9;border:1.5px solid #c8e6c9}
+.c-pend{background:#ffebee;border:1.5px solid #ffcdd2}
+.counter label{font-size:10px;color:#666;display:block;margin-bottom:4px;font-weight:700}
+.counter .val{font-size:32px;font-weight:700;line-height:1}
+.c-ok .val{color:#1b5e20}
+.c-pend .val{color:#c62828}
+
+/* LISTA TAREFAS */
+.tarefa-item{background:#fff;border:1.5px solid #e4e6ea;border-radius:10px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center}
+.tarefa-item:active,.tarefa-item:hover{border-color:#0057b8;background:#f0f7ff}
+.tarefa-id{font-size:14px;font-weight:700;color:#0057b8;margin-bottom:4px}
+.tarefa-meta{font-size:11px;color:#888;line-height:1.6}
+.tarefa-chevron{font-size:20px;color:#0057b8;font-weight:700}
+
+/* TABELA */
+.tbl-wrap{overflow-x:auto;border-radius:6px;border:1px solid #e4e6ea}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:1px solid #e4e6ea;white-space:nowrap;font-size:10px}
+td{padding:9px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.done-row{background:#f1f8e9}
+
+/* BADGE */
+.badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.b-orange{background:#fff3e0;color:#e65100}
+.b-blue{background:#e8f0fe;color:#1565c0}
+.b-green{background:#e8f5e9;color:#1b5e20}
+.b-red{background:#ffebee;color:#c62828}
+
+/* BOTÃO */
+.btn{border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;height:52px;font-family:Arial;width:100%;margin-bottom:10px;transition:opacity .1s}
+.btn:active{opacity:.8}
+.btn-blue{background:#0057b8;color:#fff}
+.btn-gray{background:#9e9e9e;color:#fff}
+.btn-green{background:#1b5e20;color:#fff}
+.btn-red{background:#c62828;color:#fff}
+.btn-out{background:#fff;color:#0057b8;border:2px solid #0057b8}
+.btn:disabled{background:#e0e0e0;color:#aaa;cursor:not-allowed}
+
+/* ALERTA NF */
+.alerta-nf{display:none;background:rgba(198,40,40,.07);border:2px solid #c62828;border-radius:10px;padding:16px;margin-bottom:12px;text-align:center;animation:shake .3s}
+.alerta-nf.show{display:block}
+.alerta-nf-msg{color:#c62828;font-weight:700;font-size:13px;margin-bottom:10px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ALERTA ENDEREÇO */
+.alerta-end{display:none;background:rgba(198,40,40,.07);border:2px solid #c62828;border-radius:10px;padding:14px;margin-top:8px;text-align:center}
+.alerta-end.show{display:block}
+
+/* RESUMO */
+.resumo-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.resumo-item:last-child{border:none;padding-bottom:0}
+.resumo-label{font-size:12px;color:#888}
+.resumo-val{font-size:12px;font-weight:700;color:#333}
+
+/* SUCCESS BOX */
+.success-box{background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
+.success-box .si{font-size:32px;margin-bottom:6px}
+.success-box p{font-size:12px;color:#1b5e20;font-weight:700;line-height:1.5}
+
+/* FIELDS */
+.field{margin-bottom:14px}
+.field label{font-size:12px;font-weight:700;color:#444;display:block;margin-bottom:6px}
+.field input{width:100%;border:2px solid #d8dde6;border-radius:8px;padding:0 14px;font-size:14px;height:52px;font-family:Arial;background:#fff}
+.field input:focus{outline:none;border-color:#0057b8}
+.field .hint{font-size:10px;color:#888;margin-top:4px;text-align:center}
+.req{color:#c62828}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:200}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;overflow:hidden;box-shadow:0 -8px 32px rgba(0,0,0,.2);animation:slideup .25s}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:16px 20px;color:#fff;font-size:14px;font-weight:700}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px 24px;display:flex;flex-direction:column;gap:8px}
+.ok-icon{width:60px;height:60px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:4px auto 14px;color:#1b5e20;font-size:28px;font-weight:700}
+
+.footer{text-align:center;font-size:10px;color:#bbb;padding:16px}
+</style>
+</head>
+<body>
+
+
+
+<div class="stepbar">
+  <div class="step active" id="step1"><div class="step-dot">1</div><div class="step-lbl">Tarefa</div></div>
+  <div class="step-line" id="line1"></div>
+  <div class="step" id="step2"><div class="step-dot">2</div><div class="step-lbl">Origem</div></div>
+  <div class="step-line" id="line2"></div>
+  <div class="step" id="step3"><div class="step-dot">3</div><div class="step-lbl">Volumes</div></div>
+  <div class="step-line" id="line3"></div>
+  <div class="step" id="step4"><div class="step-dot">4</div><div class="step-lbl">Destino</div></div>
+</div>
+
+<div class="main">
+
+  <!-- TELA 1: SELECIONAR TAREFA -->
+  <div class="screen active" id="sc-tarefa">
+    <div id="banner-unica" style="display:none">
+      <div class="banner">
+        <div class="banner-icon">⇄</div>
+        <div class="banner-text">
+          <div class="banner-title">Tarefa identificada automaticamente</div>
+          <div class="banner-sub">Existe apenas uma tarefa de remanejamento pendente. Selecionando automaticamente...</div>
+        </div>
+      </div>
+    </div>
+    <div id="lista-tarefas"></div>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- TELA 2: ENDEREÇO DE ORIGEM -->
+  <div class="screen" id="sc-origem">
+    <!-- BIPE NO TOPO -->
+    <div class="bipe-principal">
+      <div class="bipe-label"><span>📷</span> Bipe o endereço de origem</div>
+      <input type="text" id="origem-input" placeholder="Leia o código de barras do endereço" onkeydown="if(event.key==='Enter')validarOrigem(this.value)"/>
+      <div class="bipe-hint">Aproxime o leitor ao endereço onde os volumes estão armazenados</div>
+      <div class="alerta-end" id="alerta-end">
+        <div style="color:#c62828;font-weight:700;font-size:12px;margin-bottom:4px">⚠ Endereço não corresponde à tarefa</div>
+        <div style="font-size:11px;color:#c62828" id="alerta-end-msg">Verifique o endereço e tente novamente.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Informações da Tarefa <span class="badge b-orange" id="tarefa-badge-origem">REM-001</span></div>
+      <div class="counters">
+        <div class="counter c-ok"><label>NFs na tarefa</label><div class="val" id="origem-nfs">0</div></div>
+        <div class="counter c-ok"><label>Total volumes</label><div class="val" id="origem-vols">0</div></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px">Endereços esperados</div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Endereço</th><th>NFs</th><th>Volumes</th></tr></thead>
+        <tbody id="origem-ends-tbody"></tbody></table>
+      </div>
+    </div>
+    <button class="btn btn-gray" onclick="voltarTarefas()">← Voltar</button>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- TELA 3: LEITURA DE VOLUMES -->
+  <div class="screen" id="sc-leitura">
+    <!-- BIPE FIXO NO TOPO -->
+    <div class="bipe-principal bipe-sticky">
+      <div class="bipe-label"><span>📷</span> Bipe a etiqueta da NR / NF</div>
+      <input type="text" id="bipe-input" placeholder="Leia o código de barras da etiqueta" onkeydown="if(event.key==='Enter')lerEtiqueta(this.value)"/>
+      <div class="bipe-hint">Bipe cada volume para contabilizar</div>
+      <div class="alerta-nf" id="alerta-nf">
+        <div class="alerta-nf-msg">⚠ NF não pertence à tarefa de remanejamento</div>
+        <button class="btn btn-red" style="height:42px;font-size:12px" onclick="fecharAlertaNF()">OK — Continuar leitura</button>
+      </div>
+    </div>
+
+    <div class="counters">
+      <div class="counter c-ok"><label>NFs processadas</label><div class="val" id="cnt-proc-nfs">0</div></div>
+      <div class="counter c-pend"><label>NFs pendentes</label><div class="val" id="cnt-pend-nfs">0</div></div>
+      <div class="counter c-ok"><label>Vol. separados</label><div class="val" id="cnt-proc-vols">0</div></div>
+      <div class="counter c-pend"><label>Vol. pendentes</label><div class="val" id="cnt-pend-vols">0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Acompanhamento das NFs</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>NR</th><th>NF</th><th>Vol.</th><th>Lidos</th><th>Status</th></tr></thead>
+          <tbody id="nfs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="btn btn-green" id="btn-finalizar" disabled onclick="irDestino()" style="display:none">✓ Todos lidos — Confirmar destino</button>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- TELA 4: ENDEREÇO DE DESTINO -->
+  <div class="screen" id="sc-destino">
+    <div class="success-box">
+      <div class="si">✓</div>
+      <p>Separação concluída!<br>Bipe o endereço de destino para efetivar o remanejamento.</p>
+    </div>
+
+    <!-- BIPE NO TOPO -->
+    <div class="bipe-principal">
+      <div class="bipe-label"><span>📷</span> Bipe o endereço de destino</div>
+      <input type="text" id="destino-input" placeholder="Bancada ou endereço de triagem" onkeydown="if(event.key==='Enter')confirmarDestino(this.value)"/>
+      <div class="bipe-hint">Após bipagem os volumes assumirão o status do setor vinculado</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Resumo da Operação</div>
+      <div class="resumo-item"><span class="resumo-label">Tarefa</span><span class="resumo-val" id="res-tarefa">—</span></div>
+      <div class="resumo-item"><span class="resumo-label">Endereço origem</span><span class="resumo-val" id="res-origem">—</span></div>
+      <div class="resumo-item"><span class="resumo-label">NFs movidas</span><span class="resumo-val" id="res-nfs">—</span></div>
+      <div class="resumo-item"><span class="resumo-label">Volumes</span><span class="resumo-val" id="res-vols">—</span></div>
+    </div>
+    <button class="btn btn-gray" onclick="voltarLeitura()">← Voltar</button>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL SUCESSO -->
+<div class="overlay" id="modal-ok">
+  <div class="modal">
+    <div class="modal-hdr">Remanejamento Concluído</div>
+    <div class="modal-body" style="text-align:center">
+      <div class="ok-icon">✓</div>
+      <p style="font-size:12px;color:#444;line-height:1.8" id="ok-msg"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-blue" onclick="reiniciar()">OK — Nova tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALERTA -->
+<div class="overlay" id="modal-alerta">
+  <div class="modal">
+    <div class="modal-hdr">Atenção</div>
+    <div class="modal-body" style="text-align:center;padding:20px">
+      <p style="font-size:13px;color:#444;line-height:1.6" id="alerta-msg"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-blue" onclick="closeM('modal-alerta')">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var tarefaAtual=null, origemAtual=null, remNFs=[];
+
+var tarefasData=[
+  {id:1,desc:'REM-001',dataLib:'26/05/2026 09:14',
+   nfs:[{nr:'NR-00406',nf:'45676/1',vols:2,lidos:0,concluida:false},{nr:'NR-00407',nf:'45677/1',vols:2,lidos:0,concluida:false},{nr:'NR-00408',nf:'45678/1',vols:1,lidos:0,concluida:false}],
+   enderecos:[{end:'END-DEV-01',nfs:3,vols:5}]}
+];
+
+function initTarefas(){
+  var pendentes=tarefasData.filter(function(t){return !t.concluida;});
+  var lista=document.getElementById('lista-tarefas');
+  var banner=document.getElementById('banner-unica');
+
+  if(!pendentes.length){
+    if(lista) lista.innerHTML='<div class="card" style="text-align:center;padding:32px;color:#aaa"><div style="font-size:40px;margin-bottom:10px">✓</div><div style="font-size:13px;font-weight:700">Nenhuma tarefa pendente</div><div style="font-size:11px;margin-top:4px">Todas as tarefas de remanejamento foram concluídas.</div></div>';
+    if(banner) banner.style.display='none';
+    return;
+  }
+
+  if(pendentes.length===1){
+    if(banner) banner.style.display='block';
+    if(lista) lista.innerHTML='';
+    setTimeout(function(){selecionarTarefa(pendentes[0].id);},1200);
+    return;
+  }
+
+  if(banner) banner.style.display='none';
+  if(!lista) return;
+  lista.innerHTML='<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px">'+pendentes.length+' tarefas pendentes — selecione uma:</div>';
+  pendentes.forEach(function(t){
+    var totalVols=t.nfs.reduce(function(a,n){return a+n.vols;},0);
+    var ends=t.enderecos.map(function(e){return'<span class="badge b-blue" style="margin-right:3px">'+e.end+'</span>';}).join('');
+    var div=document.createElement('div');
+    div.className='tarefa-item';
+    div.innerHTML='<div><div class="tarefa-id">'+t.desc+'</div><div class="tarefa-meta">'+t.dataLib+'<br>'+t.nfs.length+' NFs · '+totalVols+' volumes<br>'+ends+'</div></div><div class="tarefa-chevron">›</div>';
+    div.onclick=function(){selecionarTarefa(t.id);};
+    lista.appendChild(div);
+  });
+}
+
+function selecionarTarefa(id){
+  tarefaAtual=tarefasData.find(function(t){return t.id===id;});
+  if(!tarefaAtual) return;
+  remNFs=tarefaAtual.nfs.map(function(n){return{nr:n.nr,nf:n.nf,vols:n.vols,lidos:0,concluida:false};});
+  var totalVols=remNFs.reduce(function(a,n){return a+n.vols;},0);
+  var el;
+  el=document.getElementById('tarefa-badge-origem'); if(el) el.textContent=tarefaAtual.desc;
+  el=document.getElementById('origem-nfs'); if(el) el.textContent=remNFs.length;
+  el=document.getElementById('origem-vols'); if(el) el.textContent=totalVols;
+  var tbody=document.getElementById('origem-ends-tbody');
+  if(tbody) tbody.innerHTML=tarefaAtual.enderecos.map(function(e){return'<tr><td><strong>'+e.end+'</strong></td><td>'+e.nfs+'</td><td>'+e.vols+'</td></tr>';}).join('');
+  var alertaEnd=document.getElementById('alerta-end'); if(alertaEnd) alertaEnd.classList.remove('show');
+  showScreen('sc-origem'); setStep(2);
+  var inp=document.getElementById('origem-input'); if(inp){inp.value='';setTimeout(function(){inp.focus();},300);}
+}
+
+function validarOrigem(val){
+  var inp=document.getElementById('origem-input');
+  if(!val||!val.trim()) return;
+  var bipado=val.trim().toUpperCase();
+  var validos=tarefaAtual.enderecos.map(function(e){return e.end.toUpperCase();});
+  if(validos.indexOf(bipado)===-1){
+    var alerta=document.getElementById('alerta-end');
+    var msg=document.getElementById('alerta-end-msg');
+    if(msg) msg.textContent='Endereço "'+val.trim()+'" não corresponde aos endereços desta tarefa. Esperado: '+tarefaAtual.enderecos.map(function(e){return e.end;}).join(', ')+'.';
+    if(alerta) alerta.classList.add('show');
+    if(inp){inp.value='';setTimeout(function(){inp.focus();},100);}
+    return;
+  }
+  origemAtual=val.trim();
+  var alertaEnd=document.getElementById('alerta-end'); if(alertaEnd) alertaEnd.classList.remove('show');
+  var totalVols=remNFs.reduce(function(a,n){return a+n.vols;},0);
+  var el;
+  el=document.getElementById('cnt-proc-nfs'); if(el) el.textContent=0;
+  el=document.getElementById('cnt-pend-nfs'); if(el) el.textContent=remNFs.length;
+  el=document.getElementById('cnt-proc-vols'); if(el) el.textContent=0;
+  el=document.getElementById('cnt-pend-vols'); if(el) el.textContent=totalVols;
+  el=document.getElementById('btn-finalizar'); if(el) el.disabled=true;
+  renderNFsTabela();
+  showScreen('sc-leitura'); setStep(3);
+  var bipe=document.getElementById('bipe-input'); if(bipe){bipe.value='';setTimeout(function(){bipe.focus();},300);}
+}
+
+function voltarTarefas(){tarefaAtual=null;origemAtual=null;remNFs=[];showScreen('sc-tarefa');setStep(1);initTarefas();}
+function voltarLeitura(){showScreen('sc-leitura');setStep(3);}
+
+function lerEtiqueta(val){
+  var inp=document.getElementById('bipe-input');
+  if(!val||!val.trim()) return;
+  var lido=val.trim().toUpperCase(); if(inp) inp.value='';
+  var nf=remNFs.find(function(n){return n.nr.toUpperCase()===lido||n.nf.toUpperCase()===lido||n.nf.replace('/','').toUpperCase()===lido||lido.indexOf(n.nr.toUpperCase())!==-1;});
+  if(!nf){var a=document.getElementById('alerta-nf');if(a)a.classList.add('show');return;}
+  if(nf.concluida){showAlerta('Todos os volumes desta NF já foram lidos.');setTimeout(function(){if(inp)inp.focus();},400);return;}
+  nf.lidos++;if(nf.lidos>=nf.vols)nf.concluida=true;
+  atualizarContadores();renderNFsTabela();
+  var todos=remNFs.every(function(n){return n.concluida;});
+  if(todos){
+    setTimeout(function(){irDestino();},600);
+  } else {
+    var btn=document.getElementById('btn-finalizar');if(btn)btn.disabled=!todos;
+    setTimeout(function(){if(inp)inp.focus();},100);
+  }
+}
+
+function fecharAlertaNF(){var a=document.getElementById('alerta-nf');if(a)a.classList.remove('show');setTimeout(function(){var b=document.getElementById('bipe-input');if(b)b.focus();},100);}
+
+function atualizarContadores(){
+  var pN=remNFs.filter(function(n){return n.concluida;}).length;
+  var dN=remNFs.filter(function(n){return!n.concluida;}).length;
+  var pV=remNFs.reduce(function(a,n){return a+n.lidos;},0);
+  var dV=remNFs.reduce(function(a,n){return a+(n.vols-n.lidos);},0);
+  var el;
+  el=document.getElementById('cnt-proc-nfs');if(el)el.textContent=pN;
+  el=document.getElementById('cnt-pend-nfs');if(el)el.textContent=dN;
+  el=document.getElementById('cnt-proc-vols');if(el)el.textContent=pV;
+  el=document.getElementById('cnt-pend-vols');if(el)el.textContent=dV;
+}
+
+function renderNFsTabela(){
+  var tbody=document.getElementById('nfs-tbody');
+  if(!tbody)return;
+  while(tbody.firstChild)tbody.removeChild(tbody.firstChild);
+  remNFs.forEach(function(n){
+    var tr=document.createElement('tr');if(n.concluida)tr.className='done-row';
+    var tds=[n.nr,n.nf,n.vols,n.lidos];
+    tds.forEach(function(v){var td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+    var td5=document.createElement('td');
+    td5.innerHTML=n.concluida?'<span class="badge b-green">✓ OK</span>':'<span class="badge b-red">+' +(n.vols-n.lidos)+'</span>';
+    tr.appendChild(td5);tbody.appendChild(tr);
+  });
+}
+
+function irDestino(){
+  var totalVols=remNFs.reduce(function(a,n){return a+n.vols;},0);
+  var el;
+  el=document.getElementById('res-tarefa');if(el&&tarefaAtual)el.textContent=tarefaAtual.desc;
+  el=document.getElementById('res-origem');if(el)el.textContent=origemAtual||'—';
+  el=document.getElementById('res-nfs');if(el)el.textContent=remNFs.length+' NF(s)';
+  el=document.getElementById('res-vols');if(el)el.textContent=totalVols+' volume(s)';
+  showScreen('sc-destino');setStep(4);
+  var inp=document.getElementById('destino-input');if(inp){inp.value='';setTimeout(function(){inp.focus();},300);}
+}
+
+function confirmarDestino(val){
+  if(!val||!val.trim()){return;}
+  var destino=val.trim();
+  var totalVols=remNFs.reduce(function(a,n){return a+n.vols;},0);
+  var el=document.getElementById('ok-msg');
+  if(el)el.innerHTML='<strong>'+remNFs.length+' NF(s)</strong> e <strong>'+totalVols+' volume(s)</strong> movidos com sucesso.<br><br>Origem: <strong>'+(origemAtual||'—')+'</strong><br>Destino: <strong>'+destino+'</strong>';
+  document.getElementById('modal-ok').classList.add('show');
+}
+
+function reiniciar(){
+  closeM('modal-ok');
+  // Marcar tarefa atual como concluída
+  if(tarefaAtual){
+    var t=tarefasData.find(function(x){return x.id===tarefaAtual.id;});
+    if(t) t.concluida=true;
+  }
+  tarefaAtual=null;origemAtual=null;remNFs=[];
+  showScreen('sc-tarefa');setStep(1);initTarefas();
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');window.scrollTo(0,0);}
+
+function setStep(active){
+  for(var i=1;i<=4;i++){
+    var el=document.getElementById('step'+i);if(!el)continue;
+    el.classList.remove('active','done');
+    var dot=el.querySelector('.step-dot');
+    if(i<active){el.classList.add('done');if(dot)dot.textContent='✓';}
+    else if(i===active){el.classList.add('active');if(dot)dot.textContent=String(i);}
+    else{if(dot)dot.textContent=String(i);}
+    var line=document.getElementById('line'+i);
+    if(line){line.style.background=i<active?'#1b5e20':'#e4e6ea';}
+  }
+}
+
+function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function showAlerta(msg){var el=document.getElementById('alerta-msg');if(el)el.textContent=msg;document.getElementById('modal-alerta').classList.add('show');}
+
+initTarefas();
+
+function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textContent=msg;document.getElementById('modal-ok').classList.add('show');}
+</script>
+</body>
+</html>
+
+</template>
+<template id="tpl-tri">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiser Log — Triagem de Devolução</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
+
+
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+
+
+
+
+
+
+.sb-btn:hover,
+.main{padding:18px;min-height:calc(100vh-46px)}
+.page{display:none}.page.active{display:block}
+.bread{font-size:10px;color:#aaa;margin-bottom:6px}
+.bread a{color:#0057b8;cursor:pointer;text-decoration:none}
+.page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:18px;margin-bottom:12px}
+.sec{font-size:10px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #dde8f8;display:flex;justify-content:space-between;align-items:center}
+.panel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+.pc{background:#fff;border-radius:6px;padding:14px;cursor:pointer;border:2px solid transparent;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07);transition:all .15s}
+.pc:hover,.pc.active{box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.pc .n{font-size:28px;font-weight:700;line-height:1.1}
+.pc .l{font-size:9px;color:#777;margin-top:5px;line-height:1.4}
+.pc-1 .n{color:#e65100}.pc-1.active{border-color:#e65100;background:#fff3e0}
+.pc-2 .n{color:#1b5e20}.pc-2.active{border-color:#1b5e20;background:#e8f5e9}
+.filters{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+select,input[type=text],input[type=date],input[type=password]{font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;background:#fff;color:#333;height:28px;font-family:Arial}
+.btn{border:none;border-radius:4px;padding:4px 14px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:28px;font-family:Arial}
+.bb{background:#0057b8;color:#fff}.bb:hover{background:#004494}
+.bg{background:#757575;color:#fff}
+.br{background:#c62828;color:#fff}
+.bk{background:#1b5e20;color:#fff}
+.bo{background:#fff;color:#0057b8;border:1px solid #0057b8}
+.btn-sm{height:22px;padding:0 8px;font-size:9px}
+.btn:disabled{background:#d0d0d0;color:#888;cursor:not-allowed;pointer-events:none}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;color:#333;vertical-align:middle}
+tr:hover td{background:#fafbfc}
+.lnk{color:#0057b8;cursor:pointer;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.b-orange{background:#fff3e0;color:#e65100}
+.b-blue{background:#e8f0fe;color:#1565c0}
+.b-green{background:#e8f5e9;color:#1b5e20}
+.b-red{background:#ffebee;color:#c62828}
+.b-teal{background:#e0f2f1;color:#004d40}
+.b-warn{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.b-purple{background:#f3e5f5;color:#6a1b9a}
+.b-gray{background:#f5f5f5;color:#555}
+/* BANCADA SELECTOR */
+.bancada-selector{max-width:480px;margin:40px auto;text-align:center}
+.bancada-selector .icon{font-size:36px;margin-bottom:12px}
+.bancada-selector h2{font-size:14px;font-weight:700;color:#222;margin-bottom:6px}
+.bancada-selector p{font-size:11px;color:#888;margin-bottom:18px}
+.bancada-bipe{display:flex;gap:8px;margin-bottom:12px}
+.bancada-bipe input{flex:1;height:36px;font-size:12px;border:2px solid #d8dde6;border-radius:5px;padding:0 12px}
+.bancada-bipe input:focus{outline:none;border-color:#0057b8}
+.bancada-bipe button{height:36px}
+.bancada-erro{font-size:10px;color:#c62828;margin-top:6px;display:none}
+.bancada-lista{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.bancada-item{background:#fff;border:1.5px solid #e4e6ea;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s}
+.bancada-item:hover{border-color:#0057b8;background:#f0f7ff}
+.bancada-item-info{}
+.bancada-item-cod{font-size:13px;font-weight:700;color:#0057b8}
+.bancada-item-desc{font-size:10px;color:#888;margin-top:2px}
+/* BANCADA HEADER */
+.bancada-hdr{background:#e8f0fe;border:1px solid #b8d0f0;border-radius:5px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.bancada-hdr-info{font-size:11px;color:#0057b8;font-weight:700}
+.bancada-hdr-sub{font-size:10px;color:#5c7fb8}
+/* CAIXAS */
+.caixas-grupo{margin-bottom:16px}
+.caixas-grupo-titulo{font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;padding:6px 10px;background:#f8f9fa;border-radius:4px;border:1px solid #e4e6ea}
+.caixas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+.caixa-card{background:#fff;border:1.5px solid #e4e6ea;border-radius:6px;padding:12px}
+.caixa-card.aberta{border-color:#1b5e20;background:#f1f8e9}
+.caixa-card.aberta.pendente{border-color:#f9a825;background:#fffde7}
+.caixa-card.fechada{opacity:.6;border-color:#aaa}
+.caixa-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.caixa-cod{font-size:11px;font-weight:700;color:#333}
+.caixa-info{font-size:10px;color:#888;margin-bottom:8px}
+.caixa-actions{display:flex;gap:5px}
+/* NF / ITEM */
+.nf-item{background:#fff;border:1.5px solid #e4e6ea;border-radius:6px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.nf-item:hover{border-color:#0057b8;background:#f8fbff}
+.nf-info{flex:1}
+.nf-id{font-size:12px;font-weight:700;color:#0057b8}
+.nf-meta{font-size:10px;color:#888;margin-top:3px}
+.item-row{background:#fff;border:1.5px solid #e4e6ea;border-radius:6px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.item-row:hover{border-color:#0057b8;background:#f8fbff}
+.item-row.done{border-color:#1b5e20;background:#f1f8e9;opacity:.75;cursor:default}
+.item-row-info{flex:1}
+.item-pn{font-size:11px;font-weight:700;color:#333}
+.item-desc{font-size:10px;color:#888;margin-top:2px}
+/* FORM */
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.f-item{display:flex;flex-direction:column;gap:4px}
+label.fl{font-size:10px;color:#555;font-weight:700}
+.req{color:#c62828}
+input.fi,select.fi{width:100%;border:1px solid #d8dde6;border-radius:4px;padding:4px 8px;font-size:10px;height:28px;font-family:Arial;background:#fff}
+input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
+/* INFO BOXES */
+.info-box{background:#e8f0fe;border-left:3px solid #0057b8;padding:10px 14px;border-radius:0 4px 4px 0;font-size:10px;color:#1565c0;margin-bottom:14px;line-height:1.6}
+.obs-box{background:#ffebee;border-left:3px solid #c62828;padding:10px 14px;border-radius:0 4px 4px 0;font-size:10px;color:#c62828;margin-bottom:14px;line-height:1.6}
+.warn-box{background:#fff8e1;border-left:3px solid #f9a825;padding:10px 14px;border-radius:0 4px 4px 0;font-size:10px;color:#e65100;margin-bottom:14px;line-height:1.6}
+/* SEARCH */
+.search-box{display:flex;gap:6px;margin-bottom:14px}
+.search-no-result{font-size:10px;color:#c62828;margin-top:6px;display:none}
+.sel-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;min-height:28px}
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.22);width:480px}
+.modal.mw400{width:400px}.modal.mw560{width:560px}
+.mh{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:11px 18px;color:#fff;font-size:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.mh-x{cursor:pointer;opacity:.75;font-size:16px;background:none;border:none;color:#fff}
+.mb{padding:18px}
+.mf{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;background:#fafafa}
+.ok-icon{width:50px;height:50px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:8px auto 12px;color:#1b5e20;font-size:22px;font-weight:700}
+.f-hint{font-size:9px;color:#888;margin-top:3px;font-style:italic}
+.footer{text-align:center;font-size:10px;color:#bbb;padding:14px}
+</style>
+</head>
+<body>
+
+
+
+
+<div class="main">
+
+  <!-- ══ GESTÃO ══ -->
+  <div class="page active" id="page-gestao">
+    <div class="bread">Home / Triagem de Devolução</div>
+    <div class="page-title">GESTÃO DE TRIAGEM</div>
+
+    <!-- SELEÇÃO DE BANCADA -->
+    <div id="gestao-bancada-select">
+      <div class="bancada-selector">
+        <div class="icon">🏭</div>
+        <h2>Selecione a Bancada de Triagem</h2>
+        <p>Informe o código da bancada que deseja gerenciar</p>
+        <div class="bancada-bipe">
+          <input type="text" id="bancada-bipe-input" placeholder="Bipe ou digite o código da bancada" onkeydown="if(event.key==='Enter')selecionarBancadaBipe()"/>
+          <button class="btn bb" onclick="selecionarBancadaBipe()">Confirmar</button>
+        </div>
+        <div class="bancada-erro" id="bancada-erro">Bancada não encontrada. Verifique o código e tente novamente.</div>
+        <div class="bancada-lista" id="bancada-lista"></div>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO DA BANCADA -->
+    <div id="gestao-bancada-content" style="display:none">
+      <div class="bancada-hdr">
+        <div>
+          <div class="bancada-hdr-info" id="bancada-hdr-nome">BANC-01 — Bancada de Triagem 01</div>
+          <div class="bancada-hdr-sub" id="bancada-hdr-sub">Operador: Alessandro Silveira</div>
+        </div>
+        <button class="btn bo btn-sm" onclick="trocarBancada()">⇄ Trocar bancada</button>
+      </div>
+
+      <div class="panel-grid">
+        <div class="pc pc-1 active" id="pc-ag" onclick="filtrarGestao('aguardando')">
+          <div class="n" id="cnt-ag">0</div><div class="l">Aguardando triagem</div>
+        </div>
+        <div class="pc pc-2" id="pc-tri" onclick="filtrarGestao('triagem')">
+          <div class="n" id="cnt-tri">0</div><div class="l">Liberadas / Em triagem</div>
+        </div>
+      </div>
+
+      <!-- CAIXAS -->
+      <div class="card" id="card-caixas">
+        <div class="sec">
+          <span>Caixas da Bancada</span>
+          <button class="btn bo btn-sm" onclick="openNovaCaixa(null,null)">+ Abrir nova caixa</button>
+        </div>
+        <div id="caixas-content"></div>
+      </div>
+
+      <!-- LISTAGEM NRs -->
+      <div class="card">
+        <div class="filters">
+          <select id="g-status" onchange="onGStatus()" style="width:200px">
+            <option value="aguardando">Aguardando triagem</option>
+            <option value="triagem">Triagem</option>
+          </select>
+          <input type="text" id="g-pesq" placeholder="Nº NR ou NF" style="width:120px"/>
+          <input type="date" id="g-dt-ini" style="width:110px"/>
+          <input type="date" id="g-dt-fim" style="width:110px"/>
+          <button class="btn bb" onclick="renderGestao()">🔍 Pesquisar</button>
+          <button class="btn bo" onclick="limparFiltrosGestao()">Limpar</button>
+        </div>
+        <div class="sel-toolbar">
+          <div style="font-size:10px;color:#888" id="g-sel-info"></div>
+          <button class="btn bk btn-sm" id="btn-liberar-lote" style="display:none" onclick="openLiberar(null)">▶ Liberar selecionadas</button>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr id="g-thead"></tr></thead><tbody id="g-tbody"></tbody></table>
+        </div>
+      </div>
+      <div class="footer">2022 – 2026 © Wiser Log –</div>
+    </div>
+  </div>
+
+  <!-- ══ EXECUTAR TRIAGEM ══ -->
+  <div class="page" id="page-exec">
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / Triagem de Devolução / Executar Triagem</span></div>
+    <div class="page-title">EXECUTAR TRIAGEM</div>
+    <div class="search-box">
+      <input type="text" id="exec-pesq" placeholder="Pesquisar por NF, NR ou Nº Pedido" style="height:28px;font-size:11px"/>
+      <button class="btn bb" onclick="pesquisarExec()">🔍</button>
+    </div>
+    <div class="search-no-result" id="exec-no-result">Não foi localizado nenhum registro com esse número.</div>
+    <div id="exec-lista"></div>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- ══ ITENS DA NF ══ -->
+  <div class="page" id="page-itens">
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('exec')">Executar Triagem</a> / Itens da NF</span></div>
+    <div class="page-title" id="itens-titulo">Itens da NF</div>
+    <div id="itens-obs-div" style="display:none"></div>
+    <div class="card">
+      <div class="sec"><span>Selecione o produto para triar</span></div>
+      <div id="itens-lista"></div>
+    </div>
+    <button class="btn bg" onclick="nav('exec')">← Voltar</button>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+  <!-- ══ TRIAGEM DO ITEM ══ -->
+  <div class="page" id="page-triagem-item">
+    <div class="bread" style="display:flex;align-items:center;gap:8px"><button class="btn bg btn-sm back-btn-tri" onclick="_goBackTri()" style="display:none">← Voltar</button><span>Home / <a onclick="nav('exec')">Executar Triagem</a> / <a onclick="voltarItens()">Itens da NF</a> / Triar Produto</span></div>
+    <div class="page-title" id="ti-titulo">Triagem do Produto</div>
+    <div class="card" style="background:#f0f7ff;border:1px solid #b8d0f0;padding:12px 16px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:10px">
+        <div><span style="color:#888">NR</span><div style="font-weight:700;margin-top:2px" id="ti-nr">—</div></div>
+        <div><span style="color:#888">NF</span><div style="font-weight:700;margin-top:2px" id="ti-nf">—</div></div>
+        <div><span style="color:#888">Cliente</span><div style="font-weight:700;margin-top:2px" id="ti-cliente">—</div></div>
+        <div><span style="color:#888">Bancada</span><div style="font-weight:700;margin-top:2px" id="ti-end">—</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec"><span id="ti-prod-titulo">Produto</span></div>
+      <div style="font-size:10px;color:#888;margin-bottom:14px">Qtde. esperada: <strong id="ti-qtd-esp">—</strong></div>
+      <div class="f-grid">
+        <div class="f-item">
+          <label class="fl">Quantidade triada <span class="req">*</span></label>
+          <input class="fi" type="number" id="ti-qtd" placeholder="Informe a quantidade" min="1"/>
+        </div>
+        <div class="f-item">
+          <label class="fl">Status de Estoque <span class="req">*</span></label>
+          <select class="fi" id="ti-status-estoque" onchange="onStatusEstoque()">
+            <option value="">Selecione o status</option>
+            <option value="bom">Produto bom</option>
+            <option value="avariado">Avariado</option>
+            <option value="vencido">Vencido</option>
+            <option value="destruicao">Destruição</option>
+          </select>
+        </div>
+        <div class="f-item" id="ti-caixa-field">
+          <label class="fl">Caixa de destino</label>
+          <div style="font-size:10px;padding:5px 8px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;color:#555;min-height:28px;display:flex;align-items:center" id="ti-caixa-info">Selecione o status de estoque</div>
+        </div>
+        <div class="f-item" id="ti-lote-field" style="display:none">
+          <label class="fl">Lote</label>
+          <input class="fi" type="text" id="ti-lote" placeholder="Número do lote"/>
+        </div>
+        <div class="f-item" id="ti-val-field" style="display:none">
+          <label class="fl">Data de Validade</label>
+          <input class="fi" type="date" id="ti-val"/>
+        </div>
+        <div class="f-item" id="ti-fab-field" style="display:none">
+          <label class="fl">Data de Fabricação</label>
+          <input class="fi" type="date" id="ti-fab"/>
+        </div>
+        <div class="f-item" id="ti-serie-field" style="display:none">
+          <label class="fl">Número de Série <span class="req">*</span></label>
+          <input class="fi" type="text" id="ti-serie" placeholder="Informe o número de série"/>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid #eee">
+        <button class="btn bg" onclick="cancelarItem()">✕ Cancelar</button>
+        <button class="btn bk" onclick="salvarItem()">✓ Confirmar triagem do produto</button>
+      </div>
+    </div>
+    <div class="footer">2022 – 2026 © Wiser Log –</div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL SELECIONAR BANCADA (múltiplas) -->
+<div class="overlay" id="modal-bancada"></div>
+
+<!-- MODAL CONFIRMAR LIBERAÇÃO -->
+<div class="overlay" id="modal-conf-lib">
+  <div class="modal mw400">
+    <div class="mh">Confirmar Liberação para Triagem</div>
+    <div class="mb" style="padding:20px 18px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">▶</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#0057b8;margin-bottom:8px" id="conf-lib-titulo">Liberar para triagem</div>
+          <div style="font-size:11px;color:#444;line-height:1.7" id="conf-lib-lista"></div>
+          <div style="font-size:10px;color:#888;margin-top:10px">Esta ação pode ser cancelada enquanto a triagem não for iniciada.</div>
+        </div>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:center;gap:10px">
+      <button class="btn bg" onclick="closeM('modal-conf-lib')">Não, voltar</button>
+      <button class="btn bk" onclick="confirmarLib()">Sim, liberar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CANCELAR LIBERAÇÃO -->
+<div class="overlay" id="modal-cancel-lib">
+  <div class="modal mw400">
+    <div class="mh">Cancelar Liberação</div>
+    <div class="mb" style="text-align:center;padding:22px">
+      <div style="font-size:28px;margin-bottom:10px">⚠</div>
+      <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:8px">Cancelar liberação para triagem?</div>
+      <p style="font-size:11px;color:#666;line-height:1.7">A NR retornará ao status "Aguardando triagem".</p>
+    </div>
+    <div class="mf" style="justify-content:center;gap:10px">
+      <button class="btn bg" onclick="closeM('modal-cancel-lib')">Não, manter</button>
+      <button class="btn br" onclick="confirmarCancelLib()">Sim, cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA CAIXA -->
+<div class="overlay" id="modal-nova-caixa">
+  <div class="modal mw400">
+    <div class="mh">Abrir Nova Caixa de Triagem <button class="mh-x" onclick="closeM('modal-nova-caixa')">✕</button></div>
+    <div class="mb">
+      <div class="info-box" id="nova-caixa-info-box" style="display:none"></div>
+      <div class="f-item" style="margin-bottom:14px">
+        <label class="fl">Bipe ou informe o endereço da caixa <span class="req">*</span></label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="nova-caixa-end-bipe" class="fi" style="height:28px;flex:1" placeholder="Código de barras ou endereço" onkeydown="if(event.key==='Enter')validarEndCaixa()"/>
+          <button class="btn bb btn-sm" onclick="validarEndCaixa()">OK</button>
+        </div>
+        <div class="f-hint">Apenas endereços do tipo "Caixa Triagem" ativos</div>
+        <div style="font-size:10px;color:#c62828;margin-top:4px;display:none" id="nova-caixa-end-erro">Endereço não encontrado ou não é do tipo Caixa Triagem.</div>
+      </div>
+      <div class="f-item" id="nova-caixa-status-wrap" style="display:none">
+        <label class="fl">Status de Estoque <span class="req">*</span></label>
+        <select class="fi" id="nova-caixa-status" style="margin-top:4px">
+          <option value="">Selecione o status de estoque</option>
+          <option value="bom">Produto bom</option>
+          <option value="avariado">Avariado</option>
+          <option value="vencido">Vencido</option>
+          <option value="destruicao">Destruição</option>
+        </select>
+        <div class="f-hint">Cada bancada permite apenas 1 caixa ativa por status de estoque</div>
+        <div style="font-size:10px;color:#c62828;margin-top:4px;display:none" id="nova-caixa-status-erro"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bg" onclick="closeM('modal-nova-caixa')">Cancelar</button>
+      <button class="btn bk" onclick="confirmarNovaCaixa()">Abrir Caixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER CAIXA -->
+<div class="overlay" id="modal-ver-caixa">
+  <div class="modal mw560">
+    <div class="mh" id="ver-caixa-titulo">Caixa ET-001 <button class="mh-x" onclick="closeM('modal-ver-caixa')">✕</button></div>
+    <div class="mb" style="padding:14px">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Produto</th><th>Descrição</th><th>Qtde</th><th>NF</th><th>Data/Hora</th></tr></thead>
+          <tbody id="ver-caixa-tbody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:10px;color:#aaa;font-style:italic;text-align:center;padding:12px;display:none" id="ver-caixa-empty">Nenhum produto alocado nesta caixa.</div>
+    </div>
+    <div class="mf"><button class="btn bg" onclick="closeM('modal-ver-caixa')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- MODAL FECHAR CAIXA -->
+<div class="overlay" id="modal-fechar-caixa">
+  <div class="modal mw400">
+    <div class="mh">Fechar Caixa</div>
+    <div class="mb" style="padding:18px">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:28px;margin-bottom:6px">🔒</div>
+        <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:6px" id="fechar-caixa-titulo">Fechar caixa?</div>
+      </div>
+      <div style="background:#f8f9fa;border:1px solid #e4e6ea;border-radius:4px;padding:10px;font-size:10px;margin-bottom:12px" id="fechar-caixa-resumo"></div>
+      <!-- Alerta divergência -->
+      <div class="warn-box" id="fechar-div-alert" style="display:none">
+        ⚠ <strong>Divergência de quantidade identificada.</strong><br>
+        Um ou mais produtos foram triados com quantidade diferente da esperada.<br>
+        É necessário autorização de um usuário avançado para fechar esta caixa.
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div class="f-item">
+            <label class="fl">Usuário <span class="req">*</span></label>
+            <input type="text" id="auth-usuario" class="fi" placeholder="Login do usuário avançado"/>
+          </div>
+          <div class="f-item">
+            <label class="fl">Senha <span class="req">*</span></label>
+            <input type="password" id="auth-senha" class="fi" placeholder="Senha"/>
+          </div>
+        </div>
+        <div style="font-size:9px;color:#888;margin-top:6px;font-style:italic">Use usuário: <strong>supervisor</strong> / senha: <strong>1234</strong></div>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:center;gap:10px">
+      <button class="btn bg" onclick="closeM('modal-fechar-caixa')">Cancelar</button>
+      <button class="btn bk" onclick="confirmarFecharCaixa()">✓ Confirmar fechamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUCESSO -->
+<div class="overlay" id="modal-ok">
+  <div class="modal mw400">
+    <div class="mh">Sucesso</div>
+    <div class="mb" style="text-align:center;padding:20px">
+      <div class="ok-icon">✓</div>
+      <p style="font-size:11px;color:#444" id="ok-msg"></p>
+    </div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-ok')">OK</button></div>
+  </div>
+</div>
+
+<!-- MODAL ALERTA -->
+<div class="overlay" id="modal-alerta">
+  <div class="modal mw400">
+    <div class="mh">Atenção</div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg"></p></div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-alerta')">OK</button></div>
+  </div>
+</div>
+
+<script>
+/* ══ DADOS ══ */
+var gestaoStatus='aguardando', cancelLibId=null, liberarIds=[];
+var nfAtual=null, itemAtual=null, nfEmTriagem=null;
+var caixaParaFechar=null, novaCaixaEndConfirmado=null, novaCaixaCallback=null;
+var bancadaAtual=null;
+var statusFixoNovaCaixa=null;
+
+var bancadas=[
+  {cod:'BANC-01',desc:'Bancada de Triagem 01'}
+];
+
+var enderecosCaixaTriagem=[
+  {cod:'ET-001',desc:'Slot A — Bancada 01',bancada:'BANC-01'},
+  {cod:'ET-002',desc:'Slot B — Bancada 01',bancada:'BANC-01'},
+  {cod:'ET-003',desc:'Slot C — Bancada 01',bancada:'BANC-01'}
+];
+
+var caixas=[
+  {id:1,end:'ET-001',bancada:'BANC-01',statusEstoque:'bom',statusLabel:'Produto bom',aberta:true,fechada:false,
+   itens:[{pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,nf:'45675/2',dataHora:'25/05 14:32',divQtd:false}]},
+  {id:2,end:'ET-002',bancada:'BANC-01',statusEstoque:'avariado',statusLabel:'Avariado',aberta:true,fechada:false,
+   itens:[{pn:'PROD-003',desc:'Sleeve Virtuo',qtd:2,nf:'45675/2',dataHora:'25/05 14:45',divQtd:true}]}
+];
+
+var nrs=[
+  {id:1,data:'26/05/2026',nr:'NR-00406',nf:'45676/1',serie:'1',cliente:'João Silva',nn:'NN-001',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-001',
+   recebidoEm:'26/05/2026 09:00',recebidoPor:'Operador01',liberadoEm:'',div:false,divObs:'',
+   itens:[
+     {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-002',desc:'Cápsula Vanille 10un',qtd:5,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
+   ]},
+  {id:2,data:'26/05/2026',nr:'NR-00407',nf:'45677/1',serie:'1',cliente:'Maria Santos',nn:'',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-002',
+   recebidoEm:'26/05/2026 09:10',recebidoPor:'Operador01',liberadoEm:'',div:true,divObs:'Embalagem danificada.',
+   itens:[
+     {id:1,pn:'PROD-003',desc:'Sleeve Virtuo',qtd:8,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-004',desc:'Máquina Inissia Branca',qtd:1,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:true,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false}
+   ]},
+  {id:4,data:'25/05/2026',nr:'NR-00405',nf:'45675/2',serie:'2',cliente:'Empresa MNO',nn:'NN-011',
+   status:'liberada',bancada:'BANC-01',vols:3,pedido:'PED-010',
+   recebidoEm:'25/05/2026 08:00',recebidoPor:'Operador01',liberadoEm:'25/05/2026 – Alessandro',div:false,divObs:'',
+   itens:[
+     {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:30,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
+     {id:2,pn:'PROD-006',desc:'Cápsula Roma 10un',qtd:15,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
+   ]}
+];
+
+function today(){return new Date().toLocaleDateString('pt-BR');}
+function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+/* ══ NAVEGAÇÃO ══ */
+var _navHistTri=[];
+function nav(p){
+  var cur=document.querySelector('.page.active');
+  if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.sb-btn').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+p).classList.add('active');
+  var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
+  if(p==='gestao'){initGestao();}
+  if(p==='exec'){renderExec();}
+  _updateBackBtnTri();
+}
+function _goBackTri(){
+  if(_navHistTri.length===0)return;
+  var prev=_navHistTri.pop();
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+prev).classList.add('active');
+  if(prev==='gestao')initGestao();
+  if(prev==='exec')renderExec();
+  _updateBackBtnTri();
+}
+function _updateBackBtnTri(){
+  document.querySelectorAll('.back-btn-tri').forEach(function(b){
+    b.style.display=_navHistTri.length>0?'inline-flex':'none';
+  });
+}
+function voltarItens(){if(nfAtual)abrirItens(nfAtual.id);else nav('exec');}
+
+/* ══ SELEÇÃO DE BANCADA ══ */
+function initGestao(){
+  if(bancadas.length===1){
+    selecionarBancada(bancadas[0].cod);
+    return;
+  }
+  // Múltiplas bancadas — mostrar seletor
+  document.getElementById('gestao-bancada-select').style.display='block';
+  document.getElementById('gestao-bancada-content').style.display='none';
+  var lista=document.getElementById('bancada-lista');
+  lista.innerHTML='';
+  bancadas.forEach(function(b){
+    var nrsPend=nrs.filter(function(d){return d.bancada===b.cod&&(d.status==='aguardando'||d.status==='liberada'||d.status==='em-triagem');}).length;
+    var div=document.createElement('div');
+    div.className='bancada-item';
+    div.innerHTML='<div class="bancada-item-info"><div class="bancada-item-cod">'+b.cod+'</div>'+
+      '<div class="bancada-item-desc">'+b.desc+' &nbsp;·&nbsp; '+nrsPend+' NR(s) pendente(s)</div></div>'+
+      '<span style="color:#0057b8;font-size:18px;font-weight:700">›</span>';
+    div.onclick=function(){selecionarBancada(b.cod);};
+    lista.appendChild(div);
+  });
+}
+
+function selecionarBancadaBipe(){
+  var val=document.getElementById('bancada-bipe-input').value.trim().toUpperCase();
+  var b=bancadas.find(function(x){return x.cod.toUpperCase()===val||x.desc.toUpperCase().includes(val);});
+  var erro=document.getElementById('bancada-erro');
+  if(!b){erro.style.display='block';return;}
+  erro.style.display='none';
+  selecionarBancada(b.cod);
+}
+
+function selecionarBancada(cod){
+  var b=bancadas.find(function(x){return x.cod===cod;});
+  if(!b)return;
+  bancadaAtual=b;
+  document.getElementById('gestao-bancada-select').style.display='none';
+  document.getElementById('gestao-bancada-content').style.display='block';
+  var hdrNome=document.getElementById('bancada-hdr-nome');
+  var hdrSub=document.getElementById('bancada-hdr-sub');
+  if(hdrNome)hdrNome.textContent=b.cod+' — '+b.desc;
+  if(hdrSub)hdrSub.textContent='Operador: Alessandro Silveira';
+  updateCounters();renderCaixas();renderGestao();
+}
+
+function trocarBancada(){
+  bancadaAtual=null;
+  document.getElementById('gestao-bancada-select').style.display='block';
+  document.getElementById('gestao-bancada-content').style.display='none';
+  document.getElementById('bancada-bipe-input').value='';
+  initGestao();
+}
+
+/* ══ CONTADORES ══ */
+function updateCounters(){
+  if(!bancadaAtual)return;
+  var ag=nrs.filter(function(d){return d.status==='aguardando'&&d.bancada===bancadaAtual.cod;}).length;
+  var tri=nrs.filter(function(d){return(d.status==='liberada'||d.status==='em-triagem')&&d.bancada===bancadaAtual.cod;}).length;
+  var el;
+  el=document.getElementById('cnt-ag');if(el)el.textContent=ag;
+  el=document.getElementById('cnt-tri');if(el)el.textContent=tri;
+}
+
+/* ══ CAIXAS ══ */
+function renderCaixas(){
+  var content=document.getElementById('caixas-content');
+  if(!content||!bancadaAtual)return;
+  content.innerHTML='';
+  var caixasBancada=caixas.filter(function(c){return c.bancada===bancadaAtual.cod&&!c.fechada;});
+  if(!caixasBancada.length){
+    content.innerHTML='<div style="font-size:10px;color:#aaa;font-style:italic;padding:6px 0">Nenhuma caixa aberta nesta bancada.</div>';
+    return;
+  }
+  // Verificar se há NFs pendentes (para cor dos cards)
+  var temPendente=nrs.some(function(d){return d.status==='em-triagem'&&d.bancada===bancadaAtual.cod;});
+  var colorMap={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
+  var grid=document.createElement('div');
+  grid.className='caixas-grid';
+  caixasBancada.forEach(function(cx){
+    var card=document.createElement('div');
+    var cardClass='caixa-card aberta';
+    if(temPendente)cardClass+=' pendente';
+    card.className=cardClass;
+    var canClose=!temPendente;
+    var closeBtnTitle=canClose?'Fechar caixa':'Existe triagem em andamento. Conclua a triagem ativa para fechar.';
+    card.innerHTML='<div class="caixa-top">'+
+      '<span class="caixa-cod">'+cx.end+'</span>'+
+      '<span class="badge b-green">Aberta</span>'+
+      '</div>'+
+      '<div style="font-size:11px;font-weight:700;color:'+(colorMap[cx.statusEstoque]||'#555')+';margin-bottom:3px">'+cx.statusLabel+'</div>'+
+      '<div class="caixa-info">'+cx.itens.length+' produto(s) alocado(s)</div>'+
+      '<div class="caixa-actions">'+
+      '<button class="btn bo btn-sm" onclick="verCaixa('+cx.id+')">Ver</button>'+
+      '<button class="btn br btn-sm" '+(canClose?'':'disabled title="'+closeBtnTitle+'"')+' onclick="openFecharCaixa('+cx.id+')">🔒 Fechar</button>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+  content.appendChild(grid);
+}
+
+function verCaixa(id){
+  var cx=caixas.find(function(c){return c.id===id;});
+  if(!cx)return;
+  var titulo=document.getElementById('ver-caixa-titulo');
+  if(titulo)titulo.innerHTML=cx.end+' — '+cx.statusLabel+' <button class="mh-x" onclick="closeM(\'modal-ver-caixa\')">✕</button>';
+  var tbody=document.getElementById('ver-caixa-tbody');
+  var empty=document.getElementById('ver-caixa-empty');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(!cx.itens.length){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  cx.itens.forEach(function(it){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+it.pn+'</td><td>'+it.desc+'</td><td>'+it.qtd+(it.divQtd?'<span class="badge b-warn" style="margin-left:4px">⚠ Div.</span>':'')+'</td><td>'+it.nf+'</td><td>'+it.dataHora+'</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('modal-ver-caixa').classList.add('show');
+}
+
+function openNovaCaixa(statusSugerido,callback){
+  novaCaixaEndConfirmado=null;
+  novaCaixaCallback=callback||null;
+  statusFixoNovaCaixa=statusSugerido||null;
+  document.getElementById('nova-caixa-end-bipe').value='';
+  document.getElementById('nova-caixa-end-erro').style.display='none';
+  document.getElementById('nova-caixa-status-wrap').style.display='none';
+  document.getElementById('nova-caixa-status').value=statusSugerido||'';
+  document.getElementById('nova-caixa-status-erro').style.display='none';
+  var infoBox=document.getElementById('nova-caixa-info-box');
+  var labels={bom:'Produto bom',avariado:'Avariado',vencido:'Vencido',destruicao:'Destruição'};
+  if(statusSugerido){
+    infoBox.style.display='block';
+    infoBox.textContent='Não existe caixa aberta para o status "'+labels[statusSugerido]+'". Abra uma caixa para continuar a triagem.';
+    // Bloquear alteração do status
+    document.getElementById('nova-caixa-status').disabled=true;
+  }else{
+    infoBox.style.display='none';
+    document.getElementById('nova-caixa-status').disabled=false;
+  }
+  document.getElementById('modal-nova-caixa').classList.add('show');
+  setTimeout(function(){document.getElementById('nova-caixa-end-bipe').focus();},100);
+}
+
+function validarEndCaixa(){
+  var val=document.getElementById('nova-caixa-end-bipe').value.trim().toUpperCase();
+  var erro=document.getElementById('nova-caixa-end-erro');
+  var end=enderecosCaixaTriagem.find(function(e){return e.cod.toUpperCase()===val;});
+  if(!end){erro.textContent='Endereço não encontrado ou não é do tipo Caixa Triagem.';erro.style.display='block';return;}
+  if(bancadaAtual&&end.bancada!==bancadaAtual.cod){erro.textContent='Este endereço pertence à bancada '+end.bancada+', não à bancada atual.';erro.style.display='block';return;}
+  var jaAberta=caixas.find(function(c){return c.end===end.cod&&c.aberta&&!c.fechada;});
+  if(jaAberta){erro.textContent='Já existe uma caixa aberta neste endereço.';erro.style.display='block';return;}
+  erro.style.display='none';
+  novaCaixaEndConfirmado=end;
+  document.getElementById('nova-caixa-status-wrap').style.display='flex';
+  document.getElementById('nova-caixa-status').focus();
+}
+
+function confirmarNovaCaixa(){
+  if(!novaCaixaEndConfirmado){showAlerta('Informe e confirme o endereço da caixa.');return;}
+  var st=document.getElementById('nova-caixa-status').value;
+  if(!st){showAlerta('Selecione o status de estoque.');return;}
+  var erroSt=document.getElementById('nova-caixa-status-erro');
+  var bancadaCod=bancadaAtual?bancadaAtual.cod:(novaCaixaEndConfirmado.bancada||'');
+  var jaStatus=caixas.find(function(c){return c.statusEstoque===st&&c.bancada===bancadaCod&&c.aberta&&!c.fechada;});
+  if(jaStatus){erroSt.textContent='Já existe caixa aberta para este status ('+jaStatus.end+').';erroSt.style.display='block';return;}
+  erroSt.style.display='none';
+  var labels={bom:'Produto bom',avariado:'Avariado',vencido:'Vencido',destruicao:'Destruição'};
+  var nova={id:Date.now(),end:novaCaixaEndConfirmado.cod,bancada:bancadaCod,statusEstoque:st,statusLabel:labels[st]||st,aberta:true,fechada:false,itens:[]};
+  caixas.push(nova);
+  closeM('modal-nova-caixa');
+  renderCaixas();
+  if(novaCaixaCallback)novaCaixaCallback(nova);
+  else showOK('Caixa '+nova.end+' aberta para status "'+nova.statusLabel+'".');
+}
+
+function openFecharCaixa(id){
+  var cx=caixas.find(function(c){return c.id===id;});if(!cx)return;
+  caixaParaFechar=id;
+  var titulo=document.getElementById('fechar-caixa-titulo');
+  var resumo=document.getElementById('fechar-caixa-resumo');
+  var divAlert=document.getElementById('fechar-div-alert');
+  if(titulo)titulo.textContent='Fechar caixa '+cx.end+'?';
+  if(resumo)resumo.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+    '<div><span style="color:#888">Endereço:</span> <strong>'+cx.end+'</strong></div>'+
+    '<div><span style="color:#888">Status:</span> <strong>'+cx.statusLabel+'</strong></div>'+
+    '<div><span style="color:#888">Produtos:</span> <strong>'+cx.itens.length+'</strong></div>'+
+    '<div><span style="color:#888">Data/Hora:</span> <strong>'+today()+' '+now()+'</strong></div>'+
+    '</div>';
+  var temDiv=cx.itens.some(function(it){return it.divQtd;});
+  if(divAlert)divAlert.style.display=temDiv?'block':'none';
+  if(temDiv){document.getElementById('auth-usuario').value='';document.getElementById('auth-senha').value='';}
+  document.getElementById('modal-fechar-caixa').classList.add('show');
+}
+
+function confirmarFecharCaixa(){
+  var cx=caixas.find(function(c){return c.id===caixaParaFechar;});if(!cx)return;
+  var temDiv=cx.itens.some(function(it){return it.divQtd;});
+  if(temDiv){
+    var u=document.getElementById('auth-usuario').value.trim();
+    var s=document.getElementById('auth-senha').value.trim();
+    if(u!=='supervisor'||s!=='1234'){showAlerta('Credenciais inválidas. Use supervisor / 1234 neste protótipo.');return;}
+  }
+  cx.aberta=false;cx.fechada=true;
+  caixaParaFechar=null;closeM('modal-fechar-caixa');
+  renderCaixas();showOK('Caixa fechada com sucesso! Disponível para remanejamento ao estoque definitivo.');
+}
+
+/* ══ GESTÃO TABELA ══ */
+function filtrarGestao(s){
+  gestaoStatus=s;
+  document.getElementById('g-status').value=s;
+  document.querySelectorAll('.pc').forEach(function(c){c.classList.remove('active');});
+  var map={aguardando:'pc-ag',triagem:'pc-tri'};
+  var el=document.getElementById(map[s]);if(el)el.classList.add('active');
+  gestaoSelecionados=[];renderGestao();
+}
+function onGStatus(){filtrarGestao(document.getElementById('g-status').value);}
+function limparFiltrosGestao(){document.getElementById('g-pesq').value='';document.getElementById('g-dt-ini').value='';document.getElementById('g-dt-fim').value='';renderGestao();}
+
+function getStatusBadge(d){
+  if(d.status==='aguardando')return'<span class="badge b-orange">Aguardando triagem</span>';
+  if(d.status==='liberada')return'<span class="badge b-blue">Liberada para triagem</span>';
+  if(d.status==='em-triagem')return'<span class="badge b-purple">Em triagem</span>';
+  if(d.status==='pendente-alocacao')return'<span class="badge b-teal">Pendente de alocação</span>';
+  return d.status;
+}
+
+var gestaoSelecionados=[];
+
+function renderGestao(){
+  if(!bancadaAtual)return;
+  var pesq=(document.getElementById('g-pesq')||{value:''}).value.toLowerCase();
+  var filtered=nrs.filter(function(d){
+    if(d.bancada!==bancadaAtual.cod)return false;
+    if(gestaoStatus==='aguardando')return d.status==='aguardando';
+    if(gestaoStatus==='triagem')return d.status==='liberada'||d.status==='em-triagem';
+    return false;
+  }).filter(function(d){return!pesq||(d.nr.toLowerCase().includes(pesq)||d.nf.toLowerCase().includes(pesq));});
+
+  var thead=document.getElementById('g-thead');
+  var tbody=document.getElementById('g-tbody');
+  if(!thead||!tbody)return;
+  thead.innerHTML='<th><input type="checkbox" id="g-chk-all" onchange="gSelAll(this.checked)"/></th><th>Data NR</th><th>NR</th><th>NF</th><th>Status</th><th>Ações</th>';
+  tbody.innerHTML='';
+
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum registro para este status.</td></tr>';
+    atualizarToolbar();return;
+  }
+
+  filtered.forEach(function(d){
+    var tr=document.createElement('tr');
+    var divFlag=d.div?'<span class="badge b-warn" style="margin-left:4px" title="'+d.divObs+'">⚠</span>':'';
+    var acoes='';
+    if(d.status==='aguardando'){acoes='<button class="btn bb btn-sm" onclick="openLiberar('+d.id+')">▶ Liberar</button>';}
+    else if(d.status==='liberada'){acoes='<button class="btn br btn-sm" onclick="openCancelLib('+d.id+')">✕ Cancelar lib.</button>';}
+    else if(d.status==='em-triagem'){acoes='<button class="btn btn-sm" style="background:#d0d0d0;color:#888" title="NR em triagem, cancelamento não permitido" disabled>✕ Cancelar lib.</button>';}
+    var tdChk=d.status==='aguardando'?'<input type="checkbox" class="g-chk" '+(gestaoSelecionados.includes(d.id)?'checked':'')+' onchange="gToggleSel('+d.id+',this.checked)"/>':'';
+    tr.innerHTML='<td>'+tdChk+'</td><td>'+d.data+'</td><td><a class="lnk">'+d.nr+'</a>'+divFlag+'</td><td>'+d.nf+'/'+d.serie+'</td><td>'+getStatusBadge(d)+'</td><td>'+acoes+'</td>';
+    tbody.appendChild(tr);
+  });
+  atualizarToolbar();
+}
+
+function atualizarToolbar(){
+  var info=document.getElementById('g-sel-info');
+  var btn=document.getElementById('btn-liberar-lote');
+  var n=gestaoSelecionados.length;
+  if(info)info.textContent=n>0?n+' NR(s) selecionada(s)':'';
+  if(btn){btn.style.display=n>0?'inline-flex':'none';btn.textContent='▶ Liberar selecionadas ('+n+')';}
+}
+function gSelAll(c){gestaoSelecionados=c?nrs.filter(function(d){return d.status==='aguardando'&&(!bancadaAtual||d.bancada===bancadaAtual.cod);}).map(function(d){return d.id;}):[];document.querySelectorAll('.g-chk').forEach(function(el){el.checked=c;});atualizarToolbar();}
+function gToggleSel(id,c){if(c){if(!gestaoSelecionados.includes(id))gestaoSelecionados.push(id);}else{gestaoSelecionados=gestaoSelecionados.filter(function(x){return x!==id;});}atualizarToolbar();}
+
+/* ══ LIBERAR ══ */
+function openLiberar(id){
+  liberarIds=id?[id]:(gestaoSelecionados.length?gestaoSelecionados:[]);
+  if(!liberarIds.length){showAlerta('Selecione ao menos uma NR para liberar.');return;}
+  var targets=nrs.filter(function(d){return liberarIds.includes(d.id);});
+  var titulo=document.getElementById('conf-lib-titulo');
+  var lista=document.getElementById('conf-lib-lista');
+  if(titulo)titulo.textContent='Liberar '+targets.length+' NF'+(targets.length>1?'s':'')+' para triagem';
+  if(lista)lista.innerHTML=targets.map(function(d){
+    return '<div style="padding:4px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between"><span><strong>'+d.nr+'</strong> &nbsp;·&nbsp; NF '+d.nf+'</span><span style="color:#888">'+d.cliente+'</span></div>';
+  }).join('');
+  document.getElementById('modal-conf-lib').classList.add('show');
+}
+
+function confirmarLib(){
+  liberarIds.forEach(function(id){var d=nrs.find(function(x){return x.id===id;});if(d){d.status='liberada';d.liberadoEm=today()+' '+now()+' – Alessandro';}});
+  var count=liberarIds.length;liberarIds=[];gestaoSelecionados=[];
+  closeM('modal-conf-lib');updateCounters();renderGestao();
+  showOK(count+' NF'+(count>1?'s liberadas':' liberada')+' para triagem com sucesso!');
+}
+
+function openCancelLib(id){cancelLibId=id;document.getElementById('modal-cancel-lib').classList.add('show');}
+function confirmarCancelLib(){
+  var d=nrs.find(function(x){return x.id===cancelLibId;});if(d){d.status='aguardando';d.liberadoEm='';}
+  cancelLibId=null;closeM('modal-cancel-lib');updateCounters();renderGestao();
+}
+
+/* ══ EXECUTAR ══ */
+function renderExec(){
+  var lista=document.getElementById('exec-lista');if(!lista)return;
+  lista.innerHTML='';
+  var disponiveis=nrs.filter(function(d){return d.status==='liberada';});
+  if(!disponiveis.length){lista.innerHTML='<div style="text-align:center;color:#aaa;padding:30px;font-style:italic;font-size:11px">Nenhuma NF disponível para triagem.</div>';return;}
+  disponiveis.forEach(function(d){
+    var div=document.createElement('div');div.className='nf-item';
+    div.innerHTML='<div style="flex-shrink:0"><button class="btn bb btn-sm" onclick="event.stopPropagation();abrirNF('+d.id+')">Selecionar</button></div>'+
+      '<div class="nf-info"><div class="nf-id">NF '+d.nf+'/'+d.serie+'</div>'+
+      '<div class="nf-meta">NR: '+d.nr+' &nbsp;·&nbsp; '+d.itens.length+' produto(s) &nbsp;·&nbsp; '+d.cliente+'</div></div>'+
+      '<div style="color:#0057b8;font-size:18px;font-weight:700">›</div>';
+    div.onclick=function(){abrirNF(d.id);};lista.appendChild(div);
+  });
+}
+
+function pesquisarExec(){
+  var pesq=document.getElementById('exec-pesq').value.toLowerCase();
+  var lista=document.getElementById('exec-lista');
+  var noResult=document.getElementById('exec-no-result');
+  if(!pesq){renderExec();noResult.style.display='none';return;}
+  var found=nrs.filter(function(d){return d.status==='liberada'&&(d.nf.toLowerCase().includes(pesq)||d.nr.toLowerCase().includes(pesq)||(d.pedido||'').toLowerCase().includes(pesq));});
+  noResult.style.display=found.length?'none':'block';
+  lista.innerHTML='';
+  found.forEach(function(d){
+    var div=document.createElement('div');div.className='nf-item';
+    div.innerHTML='<div style="flex-shrink:0"><button class="btn bb btn-sm" onclick="event.stopPropagation();abrirNF('+d.id+')">Selecionar</button></div>'+
+      '<div class="nf-info"><div class="nf-id">NF '+d.nf+'/'+d.serie+'</div>'+
+      '<div class="nf-meta">NR: '+d.nr+' &nbsp;·&nbsp; '+d.itens.length+' produto(s)</div></div>'+
+      '<div style="color:#0057b8;font-size:18px;font-weight:700">›</div>';
+    div.onclick=function(){abrirNF(d.id);};lista.appendChild(div);
+  });
+}
+
+function abrirNF(id){
+  var d=nrs.find(function(x){return x.id===id;});if(!d)return;
+  if(nfEmTriagem&&nfEmTriagem!==id){var em=nrs.find(function(x){return x.id===nfEmTriagem;});showAlerta('Finalize a triagem da NF '+(em?em.nf:'em andamento')+' antes de iniciar outra.');return;}
+  if(d.status==='em-triagem'&&nfEmTriagem!==id){showAlerta('Esta NF já está em triagem por outro operador.');return;}
+  d.status='em-triagem';nfEmTriagem=id;nfAtual=d;
+  var itPend=d.itens.filter(function(it){return it.status==='pend';});
+  if(itPend.length===1&&d.itens.every(function(it){return it.status!=='triando';})){abrirItem(id,itPend[0].id);return;}
+  abrirItens(id);
+}
+
+/* ══ ITENS ══ */
+function abrirItens(nfId){
+  var d=nrs.find(function(x){return x.id===nfId;});if(!d)return;
+  nfAtual=d;
+  document.getElementById('itens-titulo').textContent='Produtos — NF '+d.nf+'/'+d.serie+' · '+d.nr+' · '+d.cliente;
+  var divDiv=document.getElementById('itens-obs-div');
+  divDiv.style.display=d.div?'block':'none';
+  divDiv.innerHTML=d.div?'<div class="obs-box" style="margin-bottom:12px">⚠ <strong>NR com itens divergentes.</strong> '+d.divObs+'</div>':'';
+  var lista=document.getElementById('itens-lista');lista.innerHTML='';
+  // Ordenar: pendentes primeiro, concluídos por último
+  var itensOrdenados=d.itens.slice().sort(function(a,b){
+    if(a.status==='conc'&&b.status!=='conc')return 1;
+    if(a.status!=='conc'&&b.status==='conc')return -1;
+    return 0;
+  });
+  itensOrdenados.forEach(function(it){
+    var isConc=it.status==='conc';
+    var div=document.createElement('div');
+    div.className='item-row'+(isConc?' done':'');
+    var badge=isConc?'<span class="badge b-green">✓ Triado → '+it.endTri+'</span>':'<span class="badge b-orange">Pendente</span>';
+    div.innerHTML='<div><button class="btn bb btn-sm"'+(isConc?' disabled':'')+' onclick="event.stopPropagation();abrirItem('+nfId+','+it.id+')">Selecionar</button></div>'+
+      '<div class="item-row-info"><div class="item-pn">'+it.pn+' — '+it.desc+'</div>'+
+      '<div class="item-desc">Qtde esperada: '+it.qtd+(isConc?' &nbsp;·&nbsp; Triado: '+it.qtdTriada+' &nbsp;·&nbsp; '+it.endTri:'')+'</div></div>'+badge;
+    if(!isConc)div.onclick=function(){abrirItem(nfId,it.id);};
+    lista.appendChild(div);
+  });
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-itens').classList.add('active');
+}
+
+/* ══ TRIAGEM ITEM ══ */
+function abrirItem(nfId,itemId){
+  var d=nrs.find(function(x){return x.id===nfId;});if(!d)return;
+  var it=d.itens.find(function(x){return x.id===itemId;});if(!it)return;
+  nfAtual=d;itemAtual=it;
+  document.getElementById('ti-titulo').textContent='Triagem — '+it.pn;
+  document.getElementById('ti-prod-titulo').textContent=it.pn+' — '+it.desc;
+  document.getElementById('ti-qtd-esp').textContent=it.qtd;
+  document.getElementById('ti-nr').textContent=d.nr;
+  document.getElementById('ti-nf').textContent=d.nf+'/'+d.serie;
+  document.getElementById('ti-cliente').textContent=d.cliente;
+  document.getElementById('ti-end').textContent=d.bancada||(bancadaAtual?bancadaAtual.cod:'—');
+  ['ti-qtd','ti-lote','ti-val','ti-fab','ti-serie'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ti-status-estoque').value='';
+  document.getElementById('ti-caixa-info').textContent='Selecione o status de estoque';
+  document.getElementById('ti-lote-field').style.display=it.controlaLote?'flex':'none';
+  document.getElementById('ti-val-field').style.display=it.controlaVal?'flex':'none';
+  document.getElementById('ti-fab-field').style.display=it.controlaFab?'flex':'none';
+  document.getElementById('ti-serie-field').style.display=it.controlaSerie?'flex':'none';
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-triagem-item').classList.add('active');
+  setTimeout(function(){document.getElementById('ti-qtd').focus();},100);
+}
+
+function onStatusEstoque(){
+  var st=document.getElementById('ti-status-estoque').value;
+  var infoEl=document.getElementById('ti-caixa-info');
+  if(!st){infoEl.textContent='Selecione o status de estoque';return;}
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(cx){infoEl.innerHTML='<span style="color:#1b5e20;font-weight:700">✓ '+cx.end+' — '+cx.statusLabel+'</span>';}
+  else{infoEl.innerHTML='<span style="color:#c62828">Nenhuma caixa aberta para este status — será solicitada abertura ao confirmar</span>';}
+}
+
+function salvarItem(){
+  var qtd=parseInt(document.getElementById('ti-qtd').value);
+  var st=document.getElementById('ti-status-estoque').value;
+  if(!qtd||qtd<1){showAlerta('Informe a quantidade triada.');return;}
+  if(!st){showAlerta('Selecione o status de estoque.');return;}
+  if(itemAtual.controlaSerie&&!document.getElementById('ti-serie').value.trim()){showAlerta('O número de série é obrigatório para este produto.');return;}
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(!cx){openNovaCaixa(st,function(novaCx){concluirItemNaCaixa(st,qtd);});return;}
+  concluirItemNaCaixa(st,qtd);
+}
+
+function concluirItemNaCaixa(st,qtd){
+  var bancadaCod=nfAtual?nfAtual.bancada:(bancadaAtual?bancadaAtual.cod:null);
+  var cx=caixas.find(function(c){return c.statusEstoque===st&&c.aberta&&!c.fechada&&c.bancada===bancadaCod;});
+  if(!cx){showAlerta('Caixa não encontrada. Tente novamente.');return;}
+  var divQtd=qtd!==itemAtual.qtd;
+  itemAtual.status='conc';itemAtual.endTri=cx.end;
+  itemAtual.lote=document.getElementById('ti-lote').value;
+  itemAtual.val=document.getElementById('ti-val').value;
+  itemAtual.fab=document.getElementById('ti-fab').value;
+  itemAtual.serie=document.getElementById('ti-serie').value;
+  itemAtual.qtdTriada=qtd;itemAtual.divQtd=divQtd;
+  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:qtd,nf:nfAtual.nf,dataHora:today().replace(/\//g,'/')+' '+now(),divQtd:divQtd});
+  // Atualizar caixas na gestão se divergência
+  if(divQtd){cx.itens[cx.itens.length-1].divQtd=true;}
+  var todos=nfAtual.itens.every(function(it){return it.status==='conc';});
+  if(todos){
+    nfAtual.status='pendente-alocacao';nfEmTriagem=null;
+    updateCounters();renderCaixas();
+    showOK('Triagem da NF '+nfAtual.nf+' concluída! Status: "Pendente de alocação".');
+    nfAtual=null;itemAtual=null;nav('exec');
+  }else{abrirItens(nfAtual.id);}
+}
+
+function cancelarItem(){
+  if(itemAtual)itemAtual.status='pend';
+  var algumAtivo=nfAtual&&nfAtual.itens.some(function(it){return it.status==='triando'||it.status==='conc';});
+  if(!algumAtivo&&nfAtual){nfAtual.status='liberada';nfEmTriagem=null;}
+  itemAtual=null;
+  if(nfAtual)abrirItens(nfAtual.id);else nav('exec');
+}
+
+/* ══ UTILS ══ */
+function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function showAlerta(msg){var el=document.getElementById('alerta-msg');if(el)el.textContent=msg;document.getElementById('modal-alerta').classList.add('show');}
+function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textContent=msg;document.getElementById('modal-ok').classList.add('show');}
+
+/* INIT */
+initGestao();
+</script>
+</body>
+</html>
+
+</template>
+<template id="tpl-caixas">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiser Log — Gestão de Caixas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;background:#f0f2f5}
+
+
+.hdr-logo span{background:#fff;color:#0057b8;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+
+
+
+
+
+
+.sb-btn:hover,
+.main{padding:18px}
+.page-title{font-size:13px;font-weight:700;color:#222;margin-bottom:4px}
+.page-sub{font-size:10px;color:#888;margin-bottom:18px}
+/* CARDS RESUMO */
+.resumo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.resumo-card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:14px;text-align:center;border-top:3px solid transparent}
+.resumo-card.rc-blue{border-color:#0057b8}
+.resumo-card.rc-green{border-color:#1b5e20}
+.resumo-card.rc-orange{border-color:#e65100}
+.resumo-card.rc-red{border-color:#c62828}
+.resumo-card .rc-n{font-size:26px;font-weight:700;margin-bottom:4px}
+.resumo-card.rc-blue .rc-n{color:#0057b8}
+.resumo-card.rc-green .rc-n{color:#1b5e20}
+.resumo-card.rc-orange .rc-n{color:#e65100}
+.resumo-card.rc-red .rc-n{color:#c62828}
+.resumo-card .rc-l{font-size:9px;color:#777;line-height:1.4}
+.resumo-card{transition:box-shadow .15s,transform .1s}
+.resumo-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12);transform:translateY(-1px)}
+.resumo-card.rc-active{box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-1px);outline:2px solid currentColor}
+.resumo-card.rc-blue.rc-active{outline-color:#0057b8}
+.resumo-card.rc-green.rc-active{outline-color:#1b5e20}
+.resumo-card.rc-orange.rc-active{outline-color:#e65100}
+.resumo-card.rc-red.rc-active{outline-color:#c62828}
+/* FILTROS */
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:18px;margin-bottom:12px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
+select,input[type=text],input[type=date]{font-size:10px;padding:4px 8px;border:1px solid #d8dde6;border-radius:4px;background:#fff;color:#333;height:28px;font-family:Arial}
+.btn{border:none;border-radius:4px;padding:4px 14px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:28px;font-family:Arial}
+.bb{background:#0057b8;color:#fff}.bb:hover{background:#004494}
+.bg{background:#757575;color:#fff}
+.bo{background:#fff;color:#0057b8;border:1px solid #0057b8}
+.btn-sm{height:22px;padding:0 8px;font-size:9px}
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.toggle{width:32px;height:18px;background:#d0d0d0;border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#c62828}
+.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:16px}
+.toggle-label{font-size:10px;color:#555;font-weight:700}
+/* TABELA */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#f8f9fa;padding:8px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f5;color:#333;vertical-align:middle}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:#f0f7ff}
+tr.div-row td{background:#fff8f5}
+tr.div-row:hover td{background:#fff0e8}
+tr.div-row td:first-child{border-left:3px solid #c62828}
+.lnk{color:#0057b8;cursor:pointer;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.b-blue{background:#e8f0fe;color:#1565c0}
+.b-green{background:#e8f5e9;color:#1b5e20}
+.b-orange{background:#fff3e0;color:#e65100}
+.b-red{background:#ffebee;color:#c62828}
+.b-gray{background:#f5f5f5;color:#555}
+.b-teal{background:#e0f2f1;color:#004d40}
+.b-warn{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.b-purple{background:#f3e5f5;color:#6a1b9a}
+/* DETALHE */
+.detalhe-wrap{display:none;position:fixed;top:46px;right:0;bottom:0;width:520px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.12);z-index:150;flex-direction:column;overflow:hidden}
+.detalhe-wrap.show{display:flex}
+.detalhe-hdr{padding:14px 18px;border-bottom:1px solid #e4e6ea;background:linear-gradient(90deg,#0057b8,#1a9fd4);color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.detalhe-hdr h3{font-size:12px;font-weight:700}
+.detalhe-hdr-sub{font-size:10px;opacity:.85;margin-top:2px}
+.detalhe-close{cursor:pointer;font-size:18px;opacity:.75;background:none;border:none;color:#fff}
+.detalhe-body{flex:1;overflow-y:auto;padding:16px}
+.detalhe-sec{font-size:10px;font-weight:700;color:#0057b8;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid #dde8f8}
+.detalhe-sec:first-child{margin-top:0}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.info-item{}
+.info-label{font-size:9px;color:#888;margin-bottom:2px}
+.info-val{font-size:11px;font-weight:700;color:#333}
+/* ITENS TABLE */
+.itens-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
+.itens-table th{background:#f8f9fa;padding:6px 8px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #e4e6ea}
+.itens-table td{padding:6px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.itens-table tr.div-item td{background:#fff5f5}
+/* LOG */
+.log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.log-item:last-child{border:none}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.log-dot.green{background:#1b5e20}
+.log-dot.red{background:#c62828}
+.log-dot.blue{background:#0057b8}
+.log-dot.orange{background:#e65100}
+.log-info{}
+.log-evento{font-size:10px;font-weight:700;color:#333}
+.log-detalhe{font-size:9px;color:#888;margin-top:2px}
+/* OVERLAY DETALHE */
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:140}
+.overlay-bg.show{display:block}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.22);width:400px}
+.mh{background:linear-gradient(90deg,#0057b8,#1a9fd4);padding:11px 18px;color:#fff;font-size:12px;font-weight:700}
+.mb{padding:18px}
+.mf{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:center;gap:8px;background:#fafafa}
+.footer{text-align:center;font-size:10px;color:#bbb;padding:14px}
+</style>
+</head>
+<body>
+
+
+
+
+
+<div class="main">
+  <div class="page-title">GESTÃO DE CAIXAS — TRIAGEM</div>
+  <div class="page-sub">Histórico de abertura, fechamento e conteúdo das caixas de triagem</div>
+
+  <!-- RESUMO -->
+  <div class="resumo-grid">
+    <div class="resumo-card rc-blue" id="rc-card-total" onclick="filtrarPorCard('todos')" style="cursor:pointer" title="Ver todas"><div class="rc-n" id="rc-total">0</div><div class="rc-l">Total de caixas</div></div>
+    <div class="resumo-card rc-green" id="rc-card-abertas" onclick="filtrarPorCard('aberta')" style="cursor:pointer" title="Ver abertas"><div class="rc-n" id="rc-abertas">0</div><div class="rc-l">Caixas abertas</div></div>
+    <div class="resumo-card rc-orange" id="rc-card-fechadas" onclick="filtrarPorCard('fechada')" style="cursor:pointer" title="Ver fechadas"><div class="rc-n" id="rc-fechadas">0</div><div class="rc-l">Caixas fechadas</div></div>
+    <div class="resumo-card rc-red" id="rc-card-div" onclick="filtrarPorCard('divergencias')" style="cursor:pointer" title="Ver com divergências"><div class="rc-n" id="rc-div">0</div><div class="rc-l">Com divergências</div></div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card">
+    <div class="filters">
+      <select id="f-bancada" style="width:140px">
+        <option value="">Todas as bancadas</option>
+        <option value="BANC-01">BANC-01</option>
+        <option value="BANC-02">BANC-02</option>
+      </select>
+      <input type="text" id="f-end" placeholder="Endereço da caixa" style="width:130px"/>
+      <select id="f-status" style="width:120px">
+        <option value="">Todos os status</option>
+        <option value="aberta">Aberta</option>
+        <option value="fechada">Fechada</option>
+      </select>
+      <select id="f-status-estoque" style="width:130px">
+        <option value="">Todos os estoques</option>
+        <option value="bom">Produto bom</option>
+        <option value="avariado">Avariado</option>
+        <option value="vencido">Vencido</option>
+        <option value="destruicao">Destruição</option>
+      </select>
+      <input type="date" id="f-dt-ini" style="width:110px"/>
+      <input type="date" id="f-dt-fim" style="width:110px"/>
+      <div class="toggle-wrap" onclick="toggleDiv()">
+        <div class="toggle" id="toggle-div"></div>
+        <span class="toggle-label">Somente com divergências</span>
+      </div>
+      <button class="btn bb" onclick="renderTabela()">🔍 Pesquisar</button>
+      <button class="btn bo" onclick="limpar()">Limpar</button>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Endereço</th>
+            <th>Bancada</th>
+            <th>Status Estoque</th>
+            <th>Status Caixa</th>
+            <th>Abertura</th>
+            <th>Fechamento</th>
+            <th>Operador</th>
+            <th>Itens</th>
+            <th>Divergências</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-body"></tbody>
+      </table>
+    </div>
+    <div style="font-size:10px;color:#aaa;text-align:right;margin-top:8px" id="tabela-count"></div>
+  </div>
+
+  <div class="footer">2022 – 2026 © Wiser Log –</div>
+</div>
+
+<!-- DETALHE LATERAL -->
+<div class="overlay-bg" id="overlay-bg" onclick="fecharDetalhe()"></div>
+<div class="detalhe-wrap" id="detalhe-wrap">
+  <div class="detalhe-hdr">
+    <div>
+      <h3 id="detalhe-titulo">Caixa ET-001</h3>
+      <div class="detalhe-hdr-sub" id="detalhe-sub">BANC-01 — Produto bom</div>
+    </div>
+    <button class="detalhe-close" onclick="fecharDetalhe()">✕</button>
+  </div>
+  <div class="detalhe-body">
+
+    <!-- IDENTIFICAÇÃO -->
+    <div class="detalhe-sec">Identificação</div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">Endereço</div><div class="info-val" id="d-end">—</div></div>
+      <div class="info-item"><div class="info-label">Bancada</div><div class="info-val" id="d-bancada">—</div></div>
+      <div class="info-item"><div class="info-label">Status Estoque</div><div class="info-val" id="d-status-estoque">—</div></div>
+      <div class="info-item"><div class="info-label">Status Caixa</div><div class="info-val" id="d-status-caixa">—</div></div>
+      <div class="info-item"><div class="info-label">Data Abertura</div><div class="info-val" id="d-dt-abertura">—</div></div>
+      <div class="info-item"><div class="info-label">Data Fechamento</div><div class="info-val" id="d-dt-fechamento">—</div></div>
+      <div class="info-item"><div class="info-label">Aberta por</div><div class="info-val" id="d-aberta-por">—</div></div>
+      <div class="info-item"><div class="info-label">Fechada por</div><div class="info-val" id="d-fechada-por">—</div></div>
+    </div>
+    <!-- Autorização supervisor — exibido apenas quando aplicável -->
+    <div id="d-autorizacao-wrap" style="display:none;background:#fff8e1;border:1.5px solid #f9a825;border-radius:5px;padding:10px 14px;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;color:#e65100;margin-bottom:6px">🔑 Fechamento autorizado por supervisor</div>
+      <div class="info-grid" style="margin-bottom:0">
+        <div class="info-item"><div class="info-label">Supervisor</div><div class="info-val" id="d-supervisor">—</div></div>
+        <div class="info-item"><div class="info-label">Data/Hora autorização</div><div class="info-val" id="d-dt-autorizacao">—</div></div>
+        <div class="info-item" style="grid-column:span 2"><div class="info-label">Motivo</div><div class="info-val" id="d-autorizacao-motivo">—</div></div>
+      </div>
+    </div>
+
+    <!-- ITENS ALOCADOS -->
+    <div class="detalhe-sec">Itens Alocados</div>
+    <table class="itens-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Descrição</th>
+          <th>NF</th>
+          <th style="text-align:center">Qtde NF</th>
+          <th style="text-align:center">Qtde Triada</th>
+          <th>Data/Hora</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="d-itens-tbody"></tbody>
+    </table>
+    <div style="font-size:10px;color:#aaa;font-style:italic;text-align:center;display:none" id="d-itens-empty">Nenhum item alocado nesta caixa.</div>
+
+    <!-- DIVERGÊNCIAS -->
+    <div id="d-div-section" style="display:none">
+      <div class="detalhe-sec" style="color:#c62828">⚠ Divergências Identificadas</div>
+      <div id="d-div-lista"></div>
+    </div>
+
+    <!-- LOG DE EVENTOS -->
+    <div class="detalhe-sec">Histórico de Eventos</div>
+    <div id="d-log"></div>
+
+  </div>
+</div>
+
+<!-- MODAL ALERTA -->
+<div class="overlay" id="modal-alerta">
+  <div class="modal">
+    <div class="mh">Atenção</div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg"></p></div>
+    <div class="mf"><button class="btn bb" onclick="closeM('modal-alerta')">OK</button></div>
+  </div>
+</div>
+
+<script>
+var somenteDivergencias=false;
+var caixaDetalhada=null;
+
+/* ═══ DADOS ═══ */
+var caixasData=[
+  {
+    id:1,end:'ET-001',bancada:'BANC-01',descBancada:'Bancada de Triagem 01',
+    statusEstoque:'bom',statusLabel:'Produto bom',
+    status:'aberta',
+    dtAbertura:'26/05/2026 09:15',dtFechamento:'',
+    abertaPor:'Alessandro Silveira',fechadaPor:'',
+    itens:[
+      {pn:'PROD-001',desc:'Café Intenso 250g',nf:'45676/1',qtdNF:10,qtdTriada:10,dataHora:'26/05 10:32'},
+      {pn:'PROD-002',desc:'Cápsula Vanille 10un',nf:'45676/1',qtdNF:5,qtdTriada:5,dataHora:'26/05 10:45'}
+    ],
+    log:[
+      {tipo:'abertura',evento:'Caixa aberta',detalhe:'Operador: Alessandro Silveira',dataHora:'26/05/2026 09:15'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-001 — Café Intenso 250g — Qtde: 10 — NF: 45676/1',dataHora:'26/05/2026 10:32'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-002 — Cápsula Vanille — Qtde: 5 — NF: 45676/1',dataHora:'26/05/2026 10:45'}
+    ]
+  },
+  {
+    id:2,end:'ET-002',bancada:'BANC-01',descBancada:'Bancada de Triagem 01',
+    statusEstoque:'avariado',statusLabel:'Avariado',
+    status:'aberta',
+    dtAbertura:'26/05/2026 09:20',dtFechamento:'',
+    abertaPor:'Alessandro Silveira',fechadaPor:'',
+    itens:[
+      {pn:'PROD-003',desc:'Sleeve Virtuo',nf:'45675/2',qtdNF:8,qtdTriada:6,dataHora:'26/05 11:10'}
+    ],
+    log:[
+      {tipo:'abertura',evento:'Caixa aberta',detalhe:'Operador: Alessandro Silveira',dataHora:'26/05/2026 09:20'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-003 — Sleeve Virtuo — Qtde: 6 — NF: 45675/2',dataHora:'26/05/2026 11:10'},
+      {tipo:'divergencia',evento:'Divergência registrada',detalhe:'PROD-003 — Qtde NF: 8 / Qtde triada: 6 — Diferença: -2',dataHora:'26/05/2026 11:10'}
+    ]
+  },
+  {
+    id:3,end:'ET-003',bancada:'BANC-01',descBancada:'Bancada de Triagem 01',
+    statusEstoque:'bom',statusLabel:'Produto bom',
+    status:'fechada',
+    dtAbertura:'25/05/2026 08:00',dtFechamento:'25/05/2026 17:30',
+    abertaPor:'Operador01',fechadaPor:'Alessandro Silveira',
+    itens:[
+      {pn:'PROD-005',desc:'Cápsula Decaffeinato',nf:'45674/1',qtdNF:20,qtdTriada:20,dataHora:'25/05 14:00'},
+      {pn:'PROD-006',desc:'Cápsula Roma 10un',nf:'45674/1',qtdNF:15,qtdTriada:15,dataHora:'25/05 14:20'}
+    ],
+    log:[
+      {tipo:'abertura',evento:'Caixa aberta',detalhe:'Operador: Operador01',dataHora:'25/05/2026 08:00'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-005 — Qtde: 20 — NF: 45674/1',dataHora:'25/05/2026 14:00'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-006 — Qtde: 15 — NF: 45674/1',dataHora:'25/05/2026 14:20'},
+      {tipo:'fechamento',evento:'Caixa fechada',detalhe:'Operador: Alessandro Silveira — Sem divergências',dataHora:'25/05/2026 17:30'}
+    ]
+  },
+  {
+    id:4,end:'ET-004',bancada:'BANC-02',descBancada:'Bancada de Triagem 02',
+    statusEstoque:'vencido',statusLabel:'Vencido',
+    status:'fechada',
+    dtAbertura:'24/05/2026 10:00',dtFechamento:'24/05/2026 16:45',
+    abertaPor:'Operador02',fechadaPor:'Operador02',
+    itens:[
+      {pn:'PROD-007',desc:'Cápsula Arpeggio',nf:'45673/1',qtdNF:30,qtdTriada:28,dataHora:'24/05 13:00'}
+    ],
+    autorizacaoSupervisor:{supervisor:'supervisor',dataHora:'24/05/2026 16:44',motivo:'Divergência de quantidade: PROD-007 — Esperado: 30 / Triado: 28 (-2 unidades)'},
+    log:[
+      {tipo:'abertura',evento:'Caixa aberta',detalhe:'Operador: Operador02',dataHora:'24/05/2026 10:00'},
+      {tipo:'alocacao',evento:'Produto alocado',detalhe:'PROD-007 — Qtde: 28 — NF: 45673/1',dataHora:'24/05/2026 13:00'},
+      {tipo:'divergencia',evento:'Divergência registrada',detalhe:'PROD-007 — Qtde NF: 30 / Qtde triada: 28 — Diferença: -2',dataHora:'24/05/2026 13:00'},
+      {tipo:'autorizacao',evento:'Autorização de fechamento',detalhe:'Autorizado por: supervisor — Fechamento com divergência liberado',dataHora:'24/05/2026 16:44'},
+      {tipo:'fechamento',evento:'Caixa fechada',detalhe:'Operador: Operador02 — Com divergência autorizada',dataHora:'24/05/2026 16:45'}
+    ]
+  }
+];
+
+/* ═══ TOGGLE DIVERGÊNCIAS ═══ */
+function toggleDiv(){
+  somenteDivergencias=!somenteDivergencias;
+  var toggle=document.getElementById('toggle-div');
+  if(toggle)toggle.className='toggle'+(somenteDivergencias?' on':'');
+  renderTabela();
+}
+
+/* ═══ RESUMO ═══ */
+function updateResumo(dados){
+  var el;
+  el=document.getElementById('rc-total');if(el)el.textContent=dados.length;
+  el=document.getElementById('rc-abertas');if(el)el.textContent=dados.filter(function(c){return c.status==='aberta';}).length;
+  el=document.getElementById('rc-fechadas');if(el)el.textContent=dados.filter(function(c){return c.status==='fechada';}).length;
+  el=document.getElementById('rc-div');if(el)el.textContent=dados.filter(function(c){return temDivergencia(c);}).length;
+}
+
+function temDivergencia(cx){
+  return cx.itens.some(function(it){return it.qtdNF!==it.qtdTriada;});
+}
+
+/* ═══ FILTROS ═══ */
+function limpar(){
+  document.getElementById('f-bancada').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-status-estoque').value='';
+  document.getElementById('f-dt-ini').value='';
+  document.getElementById('f-dt-fim').value='';
+  somenteDivergencias=false;
+  document.getElementById('toggle-div').className='toggle';
+  renderTabela();
+}
+
+function filtrar(){
+  var bancada=document.getElementById('f-bancada').value;
+  var end=document.getElementById('f-end').value.toLowerCase();
+  var status=document.getElementById('f-status').value;
+  var statusEstoque=document.getElementById('f-status-estoque').value;
+  return caixasData.filter(function(cx){
+    if(bancada&&cx.bancada!==bancada)return false;
+    if(end&&!cx.end.toLowerCase().includes(end))return false;
+    if(status&&cx.status!==status)return false;
+    if(statusEstoque&&cx.statusEstoque!==statusEstoque)return false;
+    if(somenteDivergencias&&!temDivergencia(cx))return false;
+    return true;
+  });
+}
+
+/* ═══ TABELA ═══ */
+var colorMapEstoque={bom:'#1b5e20',avariado:'#e65100',vencido:'#b71c1c',destruicao:'#6a1b9a'};
+
+function renderTabela(){
+  var dados=filtrar();
+  updateResumo(dados);
+  var tbody=document.getElementById('tabela-body');
+  var count=document.getElementById('tabela-count');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(count)count.textContent=dados.length+' registro(s) encontrado(s)';
+
+  if(!dados.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+
+  dados.forEach(function(cx){
+    var haDiv=temDivergencia(cx);
+    var tr=document.createElement('tr');
+    tr.className='clickable'+(haDiv?' div-row':'');
+    tr.title='Clique para ver detalhes';
+
+    var statusCaixaBadge=cx.status==='aberta'
+      ?'<span class="badge b-green">Aberta</span>'
+      :'<span class="badge b-gray">Fechada</span>';
+    var divBadge=haDiv?'<span class="badge b-warn" style="margin-left:5px">⚠ Div.</span>':'';
+    var estoqueBadge='<span style="font-weight:700;color:'+(colorMapEstoque[cx.statusEstoque]||'#555')+'">'+cx.statusLabel+'</span>';
+
+    tr.innerHTML=
+      '<td><a class="lnk">'+cx.end+'</a></td>'+
+      '<td>'+cx.bancada+'</td>'+
+      '<td>'+estoqueBadge+'</td>'+
+      '<td>'+statusCaixaBadge+divBadge+'</td>'+
+      '<td>'+cx.dtAbertura+'</td>'+
+      '<td>'+(cx.dtFechamento||'<span style="color:#aaa">—</span>')+'</td>'+
+      '<td style="font-size:9px;color:#555">'+cx.abertaPor+'</td>'+
+      '<td style="text-align:center">'+cx.itens.length+'</td>'+
+      '<td style="text-align:center">'+
+        (haDiv?'<span class="badge b-warn">'+cx.itens.filter(function(it){return it.qtdNF!==it.qtdTriada;}).length+' item(s)</span>':
+        '<span style="color:#1b5e20;font-size:10px">✓ Nenhuma</span>')+
+      '</td>';
+
+    (function(cxRef){tr.onclick=function(){abrirDetalhe(cxRef);};})(cx);
+    tbody.appendChild(tr);
+  });
+}
+
+/* ═══ DETALHE ═══ */
+function abrirDetalhe(cx){
+  caixaDetalhada=cx;
+  var haDiv=temDivergencia(cx);
+
+  // Header
+  document.getElementById('detalhe-titulo').textContent='Caixa '+cx.end;
+  document.getElementById('detalhe-sub').textContent=cx.bancada+' — '+cx.descBancada+' — '+cx.statusLabel;
+
+  // Identificação
+  document.getElementById('d-end').textContent=cx.end;
+  document.getElementById('d-bancada').textContent=cx.bancada+' — '+cx.descBancada;
+  document.getElementById('d-status-estoque').innerHTML='<span style="color:'+(colorMapEstoque[cx.statusEstoque]||'#555')+';font-weight:700">'+cx.statusLabel+'</span>';
+  document.getElementById('d-status-caixa').innerHTML=cx.status==='aberta'
+    ?'<span class="badge b-green">Aberta</span>'
+    :'<span class="badge b-gray">Fechada</span>';
+  document.getElementById('d-dt-abertura').textContent=cx.dtAbertura;
+  document.getElementById('d-dt-fechamento').textContent=cx.dtFechamento||'—';
+  document.getElementById('d-aberta-por').textContent=cx.abertaPor;
+  document.getElementById('d-fechada-por').textContent=cx.fechadaPor||'—';
+
+  // Autorização por supervisor
+  var authWrap=document.getElementById('d-autorizacao-wrap');
+  if(cx.autorizacaoSupervisor&&cx.fechadaPor){
+    authWrap.style.display='block';
+    document.getElementById('d-supervisor').textContent=cx.autorizacaoSupervisor.supervisor;
+    document.getElementById('d-dt-autorizacao').textContent=cx.autorizacaoSupervisor.dataHora;
+    document.getElementById('d-autorizacao-motivo').textContent=cx.autorizacaoSupervisor.motivo;
+  }else{
+    authWrap.style.display='none';
+  }
+
+  // Itens
+  var tbody=document.getElementById('d-itens-tbody');
+  var empty=document.getElementById('d-itens-empty');
+  tbody.innerHTML='';
+  if(!cx.itens.length){empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    cx.itens.forEach(function(it){
+      var isDiv=it.qtdNF!==it.qtdTriada;
+      var tr=document.createElement('tr');
+      if(isDiv)tr.className='div-item';
+      var diff=it.qtdTriada-it.qtdNF;
+      var diffStr=isDiv?'<span style="color:#c62828;font-size:9px;font-weight:700">('+( diff>0?'+':'')+diff+')</span>':'';
+      tr.innerHTML='<td>'+it.pn+'</td><td>'+it.desc+'</td><td>'+it.nf+'</td>'+
+        '<td style="text-align:center">'+it.qtdNF+'</td>'+
+        '<td style="text-align:center;font-weight:700;color:'+(isDiv?'#c62828':'#1b5e20')+'">'+it.qtdTriada+' '+diffStr+'</td>'+
+        '<td>'+it.dataHora+'</td>'+
+        '<td>'+(isDiv?'<span class="badge b-warn">⚠ Div.</span>':'<span class="badge b-green">✓</span>')+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Seção divergências
+  var divSection=document.getElementById('d-div-section');
+  var divLista=document.getElementById('d-div-lista');
+  if(haDiv){
+    divSection.style.display='block';
+    var divs=cx.itens.filter(function(it){return it.qtdNF!==it.qtdTriada;});
+    divLista.innerHTML=divs.map(function(it){
+      var diff=it.qtdTriada-it.qtdNF;
+      return '<div style="background:#fff5f5;border:1px solid #ffcdd2;border-radius:4px;padding:8px 12px;margin-bottom:6px;font-size:10px">'+
+        '<div style="font-weight:700;color:#c62828;margin-bottom:3px">'+it.pn+' — '+it.desc+'</div>'+
+        '<div style="color:#555">Qtde esperada (NF): <strong>'+it.qtdNF+'</strong> &nbsp;·&nbsp; Qtde triada: <strong>'+it.qtdTriada+'</strong> &nbsp;·&nbsp; Diferença: <strong style="color:#c62828">'+(diff>0?'+':'')+diff+'</strong></div>'+
+        '<div style="color:#888;margin-top:2px">NF: '+it.nf+' &nbsp;·&nbsp; '+it.dataHora+'</div>'+
+        '</div>';
+    }).join('');
+  }else{
+    divSection.style.display='none';
+  }
+
+  // Log
+  var logEl=document.getElementById('d-log');
+  var dotColors={abertura:'green',fechamento:'red',alocacao:'blue',divergencia:'orange',autorizacao:'orange'};
+  logEl.innerHTML='';
+  cx.log.forEach(function(ev){
+    var div=document.createElement('div');
+    div.className='log-item';
+    div.innerHTML='<div class="log-dot '+(dotColors[ev.tipo]||'blue')+'"></div>'+
+      '<div class="log-info">'+
+      '<div class="log-evento">'+ev.evento+'</div>'+
+      '<div class="log-detalhe">'+ev.detalhe+'</div>'+
+      '<div class="log-detalhe" style="color:#aaa;margin-top:2px">'+ev.dataHora+'</div>'+
+      '</div>';
+    logEl.appendChild(div);
+  });
+
+  document.getElementById('detalhe-wrap').classList.add('show');
+  document.getElementById('overlay-bg').classList.add('show');
+}
+
+function fecharDetalhe(){
+  document.getElementById('detalhe-wrap').classList.remove('show');
+  document.getElementById('overlay-bg').classList.remove('show');
+  caixaDetalhada=null;
+}
+
+function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+
+/* ═══ FILTRAR POR CARD ═══ */
+function filtrarPorCard(tipo){
+  // Resetar filtros do form
+  document.getElementById('f-bancada').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-status-estoque').value='';
+  document.getElementById('f-dt-ini').value='';
+  document.getElementById('f-dt-fim').value='';
+  somenteDivergencias=false;
+  document.getElementById('toggle-div').className='toggle';
+
+  // Aplicar filtro do card
+  if(tipo==='aberta')document.getElementById('f-status').value='aberta';
+  else if(tipo==='fechada')document.getElementById('f-status').value='fechada';
+  else if(tipo==='divergencias'){somenteDivergencias=true;document.getElementById('toggle-div').className='toggle on';}
+
+  // Destacar card ativo
+  ['rc-card-total','rc-card-abertas','rc-card-fechadas','rc-card-div'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove('rc-active');
+  });
+  var mapCard={todos:'rc-card-total',aberta:'rc-card-abertas',fechada:'rc-card-fechadas',divergencias:'rc-card-div'};
+  var activeCard=document.getElementById(mapCard[tipo]);
+  if(activeCard)activeCard.classList.add('rc-active');
+
+  renderTabela();
+  // Scroll suave até a tabela
+  var tabela=document.querySelector('.tbl-wrap');
+  if(tabela)tabela.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* INIT */
+renderTabela();
+
+function showAlerta(msg){var el=document.getElementById('alerta-msg');if(el)el.textContent=msg;document.getElementById('modal-alerta').classList.add('show');}
+function showOK(msg){var el=document.getElementById('ok-msg');if(el)el.textContent=msg;document.getElementById('modal-ok').classList.add('show');}
+</script>
+
+<!-- MODAL OK -->
+<div class="overlay" id="modal-ok">
+  <div class="modal" style="width:400px">
+    <div class="mh">Sucesso</div>
+    <div class="mb" style="text-align:center;padding:20px">
+      <div style="width:50px;height:50px;border-radius:50%;border:3px solid #1b5e20;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#1b5e20;font-size:22px;font-weight:700">✓</div>
+      <p style="font-size:11px;color:#444" id="ok-msg"></p>
+    </div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-ok')">OK</button></div>
+  </div>
+</div>
+
+<!-- MODAL ALERTA -->
+<div class="overlay" id="modal-alerta">
+  <div class="modal" style="width:400px">
+    <div class="mh">Atenção</div>
+    <div class="mb" style="text-align:center;padding:16px"><p style="font-size:11px;color:#444" id="alerta-msg"></p></div>
+    <div class="mf" style="justify-content:center"><button class="btn bb" onclick="closeM('modal-alerta')">OK</button></div>
+  </div>
+</div>
+</body>
+</html>
+
+</template>
+
+<script>
+var labels={'ger':'Gerenciador de Devolução','rem':'Remanejamento Devolução','tri':'Triagem de Devolução','caixas':'Gestão de Caixas'};
+var cur='ger';
+var loaded={};
+function go(k){
+  if(k===cur)return; cur=k;
+  document.querySelectorAll('.sb-btn').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('iframe').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('sb-'+k).classList.add('active');
+  document.getElementById('fr-'+k).classList.add('active');
+  document.getElementById('hdr-mod').textContent=labels[k];
+  loadFrame(k);
+}
+function loadFrame(k){
+  if(loaded[k])return; loaded[k]=true;
+  var tpl=document.getElementById('tpl-'+k);
+  if(!tpl)return;
+  var blob=new Blob([tpl.innerHTML],{type:'text/html'});
+  document.getElementById('fr-'+k).src=URL.createObjectURL(blob);
+}
+loadFrame('ger');
+</script>
+</body>
+</html>
