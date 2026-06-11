@@ -1306,10 +1306,7 @@ var tarefaAtual=null, origemAtual=null, remNFs=[];
 var tarefasData=[
   {id:1,desc:'REM-001',dataLib:'26/05/2026 09:14',
    nfs:[{nr:'NR-00406',nf:'45676/1',vols:2,lidos:0,concluida:false},{nr:'NR-00407',nf:'45677/1',vols:2,lidos:0,concluida:false},{nr:'NR-00408',nf:'45678/1',vols:1,lidos:0,concluida:false}],
-   enderecos:[{end:'END-DEV-01',nfs:3,vols:5}]},
-  {id:2,desc:'REM-002',dataLib:'27/05/2026 14:30',
-   nfs:[{nr:'NR-00409',nf:'45679/2',vols:2,lidos:0,concluida:false},{nr:'NR-00410',nf:'45680/1',vols:1,lidos:0,concluida:false}],
-   enderecos:[{end:'END-DEV-01',nfs:1,vols:2},{end:'END-DEV-02',nfs:1,vols:1}]}
+   enderecos:[{end:'END-DEV-01',nfs:3,vols:5}]}
 ];
 
 function initTarefas(){
@@ -1632,11 +1629,6 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
 <div class="main">
 
-<div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e4e6ea">
-  <button id="tab-gestao" onclick="nav('gestao')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#0057b8;cursor:pointer;border-bottom:2px solid #0057b8;margin-bottom:-2px">☰ Gestão</button>
-  <button id="tab-exec" onclick="nav('exec')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px">▶ Executar Triagem</button>
-</div>
-
   <!-- ══ GESTÃO ══ -->
   <div class="page active" id="page-gestao">
     <div class="bread">Home / Triagem de Devolução</div>
@@ -1954,15 +1946,13 @@ var bancadaAtual=null;
 var statusFixoNovaCaixa=null;
 
 var bancadas=[
-  {cod:'BANC-01',desc:'Bancada de Triagem 01'},
-  {cod:'BANC-02',desc:'Bancada de Triagem 02'}
+  {cod:'BANC-01',desc:'Bancada de Triagem 01'}
 ];
 
 var enderecosCaixaTriagem=[
   {cod:'ET-001',desc:'Slot A — Bancada 01',bancada:'BANC-01'},
   {cod:'ET-002',desc:'Slot B — Bancada 01',bancada:'BANC-01'},
-  {cod:'ET-003',desc:'Slot C — Bancada 01',bancada:'BANC-01'},
-  {cod:'ET-004',desc:'Slot A — Bancada 02',bancada:'BANC-02'}
+  {cod:'ET-003',desc:'Slot C — Bancada 01',bancada:'BANC-01'}
 ];
 
 var caixas=[
@@ -1974,23 +1964,19 @@ var caixas=[
 
 var nrs=[
   {id:1,data:'26/05/2026',nr:'NR-00406',nf:'45676/1',serie:'1',cliente:'João Silva',nn:'NN-001',
-   status:'liberada',bancada:'BANC-01',vols:2,pedido:'PED-001',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-001',
    recebidoEm:'26/05/2026 09:00',recebidoPor:'Operador01',liberadoEm:'',div:false,divObs:'',
    itens:[
      {id:1,pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:false,divQtd:false},
      {id:2,pn:'PROD-002',desc:'Cápsula Vanille 10un',qtd:5,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:false,controlaFab:false,divQtd:false}
    ]},
   {id:2,data:'26/05/2026',nr:'NR-00407',nf:'45677/1',serie:'1',cliente:'Maria Santos',nn:'',
-   status:'liberada',bancada:'BANC-01',vols:2,pedido:'PED-002',
+   status:'aguardando',bancada:'BANC-01',vols:2,pedido:'PED-002',
    recebidoEm:'26/05/2026 09:10',recebidoPor:'Operador01',liberadoEm:'',div:true,divObs:'Embalagem danificada.',
    itens:[
      {id:1,pn:'PROD-003',desc:'Sleeve Virtuo',qtd:8,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false},
      {id:2,pn:'PROD-004',desc:'Máquina Inissia Branca',qtd:1,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:true,controlaLote:false,controlaVal:false,controlaFab:false,divQtd:false}
    ]},
-  {id:3,data:'26/05/2026',nr:'NR-00408',nf:'45678/1',serie:'1',cliente:'Empresa ABC Ltda',nn:'NN-003',
-   status:'aguardando',bancada:'BANC-02',vols:1,pedido:'',
-   recebidoEm:'26/05/2026 09:20',recebidoPor:'Operador02',liberadoEm:'',div:false,divObs:'',
-   itens:[{id:1,pn:'PROD-005',desc:'Cápsula Decaffeinato',qtd:20,status:'pend',endTri:'',lote:'',val:'',fab:'',serie:'',qtdTriada:0,controlaSerie:false,controlaLote:true,controlaVal:true,controlaFab:true,divQtd:false}]},
   {id:4,data:'25/05/2026',nr:'NR-00405',nf:'45675/2',serie:'2',cliente:'Empresa MNO',nn:'NN-011',
    status:'liberada',bancada:'BANC-01',vols:3,pedido:'PED-010',
    recebidoEm:'25/05/2026 08:00',recebidoPor:'Operador01',liberadoEm:'25/05/2026 – Alessandro',div:false,divObs:'',
@@ -2009,15 +1995,12 @@ function nav(p){
   var cur=document.querySelector('.page.active');
   if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.sb-btn').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
+  var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
   if(p==='gestao'){initGestao();}
   if(p==='exec'){renderExec();}
   _updateBackBtnTri();
-  // Atualizar tabs
-  var tG=document.getElementById('tab-gestao');
-  var tE=document.getElementById('tab-exec');
-  if(tG){tG.style.color=p==='gestao'?'#0057b8':'#aaa';tG.style.borderBottomColor=p==='gestao'?'#0057b8':'transparent';}
-  if(tE){tE.style.color=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'#aaa';tE.style.borderBottomColor=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'transparent';}
 }
 function _goBackTri(){
   if(_navHistTri.length===0)return;
