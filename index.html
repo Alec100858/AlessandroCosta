@@ -1629,6 +1629,11 @@ input.fi:focus,select.fi:focus{outline:none;border-color:#0057b8}
 
 <div class="main">
 
+<div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e4e6ea">
+  <button id="tab-gestao" onclick="nav('gestao')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#0057b8;cursor:pointer;border-bottom:2px solid #0057b8;margin-bottom:-2px">Gestão</button>
+  <button id="tab-exec" onclick="nav('exec')" style="padding:8px 18px;border:none;background:none;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px">Executar Triagem</button>
+</div>
+
   <!-- ══ GESTÃO ══ -->
   <div class="page active" id="page-gestao">
     <div class="bread">Home / Triagem de Devolução</div>
@@ -1955,12 +1960,7 @@ var enderecosCaixaTriagem=[
   {cod:'ET-003',desc:'Slot C — Bancada 01',bancada:'BANC-01'}
 ];
 
-var caixas=[
-  {id:1,end:'ET-001',bancada:'BANC-01',statusEstoque:'bom',statusLabel:'Produto bom',aberta:true,fechada:false,
-   itens:[{pn:'PROD-001',desc:'Café Intenso 250g',qtd:10,nf:'45675/2',dataHora:'25/05 14:32',divQtd:false}]},
-  {id:2,end:'ET-002',bancada:'BANC-01',statusEstoque:'avariado',statusLabel:'Avariado',aberta:true,fechada:false,
-   itens:[{pn:'PROD-003',desc:'Sleeve Virtuo',qtd:2,nf:'45675/2',dataHora:'25/05 14:45',divQtd:true}]}
-];
+var caixas=[];
 
 var nrs=[
   {id:1,data:'26/05/2026',nr:'NR-00406',nf:'45676/1',serie:'1',cliente:'João Silva',nn:'NN-001',
@@ -1991,16 +1991,19 @@ function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minu
 
 /* ══ NAVEGAÇÃO ══ */
 var _navHistTri=[];
+var _navHistTri=[];
 function nav(p){
   var cur=document.querySelector('.page.active');
   if(cur&&cur.id&&cur.id!=='page-'+p)_navHistTri.push(cur.id.replace('page-',''));
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
-  document.querySelectorAll('.sb-btn').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
-  var sb=document.getElementById('sb-'+p);if(sb)sb.classList.add('active');
   if(p==='gestao'){initGestao();}
   if(p==='exec'){renderExec();}
   _updateBackBtnTri();
+  var tG=document.getElementById('tab-gestao');
+  var tE=document.getElementById('tab-exec');
+  if(tG){tG.style.color=p==='gestao'?'#0057b8':'#aaa';tG.style.borderBottomColor=p==='gestao'?'#0057b8':'transparent';}
+  if(tE){tE.style.color=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'#aaa';tE.style.borderBottomColor=(p==='exec'||p==='itens'||p==='triagem-item')?'#0057b8':'transparent';}
 }
 function _goBackTri(){
   if(_navHistTri.length===0)return;
