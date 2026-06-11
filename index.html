@@ -2573,9 +2573,17 @@ function concluirItemNaCaixa(st,qtd){
   itemAtual.fab=document.getElementById('ti-fab').value;
   itemAtual.serie=document.getElementById('ti-serie').value;
   itemAtual.qtdTriada=qtd;itemAtual.divQtd=divQtd;
-  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:qtd,nf:nfAtual.nf,dataHora:today().replace(/\//g,'/')+' '+now(),divQtd:divQtd});
-  // Atualizar caixas na gestão se divergência
-  if(divQtd){cx.itens[cx.itens.length-1].divQtd=true;}
+  var itDataHora=today()+' '+now();
+  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:itemAtual.qtd,qtdTriada:qtd,nf:nfAtual.nf,dataHora:itDataHora,divQtd:divQtd});
+  if(!cx.log)cx.log=[];
+  cx.log.push({tipo:'alocacao',evento:'Produto alocado',
+    detalhe:itemAtual.pn+' — '+itemAtual.desc+' — Qtde: '+qtd+' — NF: '+nfAtual.nf,
+    dataHora:itDataHora});
+  if(divQtd){
+    cx.log.push({tipo:'divergencia',evento:'Divergência registrada',
+      detalhe:itemAtual.pn+' — Qtde NF: '+itemAtual.qtd+' / Qtde triada: '+qtd+' — Diferença: '+(qtd-itemAtual.qtd),
+      dataHora:itDataHora});
+  }
   var todos=nfAtual.itens.every(function(it){return it.status==='conc';});
   if(todos){
     nfAtual.status='pendente-alocacao';nfEmTriagem=null;
@@ -3590,9 +3598,17 @@ function concluirItemNaCaixa(st,qtd){
   itemAtual.fab=document.getElementById('ti-fab').value;
   itemAtual.serie=document.getElementById('ti-serie').value;
   itemAtual.qtdTriada=qtd;itemAtual.divQtd=divQtd;
-  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:qtd,nf:nfAtual.nf,dataHora:today().replace(/\//g,'/')+' '+now(),divQtd:divQtd});
-  // Atualizar caixas na gestão se divergência
-  if(divQtd){cx.itens[cx.itens.length-1].divQtd=true;}
+  var itDataHora=today()+' '+now();
+  cx.itens.push({pn:itemAtual.pn,desc:itemAtual.desc,qtd:itemAtual.qtd,qtdTriada:qtd,nf:nfAtual.nf,dataHora:itDataHora,divQtd:divQtd});
+  if(!cx.log)cx.log=[];
+  cx.log.push({tipo:'alocacao',evento:'Produto alocado',
+    detalhe:itemAtual.pn+' — '+itemAtual.desc+' — Qtde: '+qtd+' — NF: '+nfAtual.nf,
+    dataHora:itDataHora});
+  if(divQtd){
+    cx.log.push({tipo:'divergencia',evento:'Divergência registrada',
+      detalhe:itemAtual.pn+' — Qtde NF: '+itemAtual.qtd+' / Qtde triada: '+qtd+' — Diferença: '+(qtd-itemAtual.qtd),
+      dataHora:itDataHora});
+  }
   var todos=nfAtual.itens.every(function(it){return it.status==='conc';});
   if(todos){
     nfAtual.status='pendente-alocacao';nfEmTriagem=null;
@@ -3649,11 +3665,9 @@ function syncCaixasData() {
           divQtd: it.divQtd || false
         };
       }),
-      log: cx.log || [{
-        tipo:'abertura', evento:'Caixa aberta',
+      log: cx.log || [{tipo:'abertura', evento:'Caixa aberta',
         detalhe:'Operador: Alessandro Silveira',
-        dataHora: cx.dtAbertura || (today() + ' ' + now())
-      }]
+        dataHora: cx.dtAbertura || (today() + ' ' + now())}]
     };
   });
 }
